@@ -36,6 +36,8 @@ node_modules/
 build/
 dist/
 .npm/
+.pnpm-store/
+.pnpm-store
 
 # Flutter / Dart (mobile/*)
 .dart_tool/
@@ -49,8 +51,8 @@ mobile/**/ios/Pods/
 
 # Runtime data & uploads
 data/
-uploads/
-backups/
+/uploads/
+/backups/
 *.db
 *.sqlite
 *.sqlite3

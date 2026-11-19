@@ -15,8 +15,9 @@ setupInterceptors(api);
 
 export const fullUrl = (path?: string): string => {
   if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  return `${API_BASE}${path}`;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}${cleanPath}`;
 };
 
 export type { AxiosProgressEvent };

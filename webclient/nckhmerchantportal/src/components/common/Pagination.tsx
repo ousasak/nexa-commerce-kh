@@ -83,7 +83,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       className={`flex flex-wrap items-center justify-between gap-4 p-4 border-t border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] text-xs font-sans select-none rounded-b-xl ${className}`}
     >
       {/* 1. Left Summary (Reference: Showing 1–10 of 30 employees) */}
-      <div className="flex items-center text-sm font-medium text-[#71817e] dark:text-[#9fb0ac]">
+      <div className="flex items-center text-sm font-semibold text-[#71817e] dark:text-[#9fb0ac]">
         {showRecordCount && (
           <p id="pagination-summary">
             {count === 0
@@ -101,14 +101,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       <div className="flex items-center gap-3 ml-auto">
         {/* Rows Selector (Reference: Rows [ 10 ∨ ]) */}
         {onPageSizeChange && (
-          <label className="flex items-center gap-2 text-sm font-medium text-[#71817e] dark:text-[#9fb0ac]">
+          <label className="flex items-center gap-2 text-sm font-semibold text-[#71817e] dark:text-[#9fb0ac]">
             <span>{t('pagination.rows', t('tables.entries', 'Rows'))}</span>
             <div className="relative">
               <select
                 id="page-size-select"
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-2.5 pr-7 text-sm font-bold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 shadow-2xs"
+                className="h-9.5 sm:h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-3 pr-8 text-sm font-bold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 shadow-2xs transition-all"
               >
                 {pageSizeOptions.map((opt) => (
                   <option key={opt} value={opt}>
@@ -117,7 +117,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 ))}
               </select>
               <svg
-                className="size-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                className="size-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -137,20 +137,20 @@ export const Pagination: React.FC<PaginationProps> = ({
           id="emp-page-prev"
           disabled={activePage <= 1}
           onClick={() => onPageChange(activePage - 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] font-bold text-slate-800 dark:text-slate-100 shadow-xs transition-all hover:bg-slate-100 dark:hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+          className="flex h-9.5 w-9.5 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-base font-bold text-slate-800 dark:text-slate-100 shadow-xs transition-all hover:bg-slate-100 dark:hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 cursor-pointer active:scale-95"
           title="Previous page"
         >
           ‹
         </button>
 
         {/* Page Number Buttons */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {getPageNumbers().map((pageItem, index) => {
             if (pageItem === '...') {
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-1.5 py-1 text-xs text-slate-400 select-none"
+                  className="px-2 py-1 text-sm text-slate-400 select-none font-bold"
                 >
                   ...
                 </span>
@@ -175,9 +175,9 @@ export const Pagination: React.FC<PaginationProps> = ({
                       }
                     : undefined
                 }
-                className={`emp-page-num flex h-8 w-8 items-center justify-center rounded-lg border text-[12px] font-bold shadow-xs transition-all cursor-pointer ${
+                className={`emp-page-num flex h-9.5 w-9.5 sm:h-10 sm:w-10 items-center justify-center rounded-xl border text-sm sm:text-base font-bold shadow-xs transition-all cursor-pointer active:scale-95 ${
                   isActive
-                    ? 'text-white shadow-2xs'
+                    ? 'text-white shadow-2xs ring-2 ring-offset-1 ring-[var(--primary-hex,#ec4899)]/40'
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
@@ -193,7 +193,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           id="emp-page-next"
           disabled={activePage >= safeTotalPages}
           onClick={() => onPageChange(activePage + 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] font-bold text-slate-800 dark:text-slate-100 shadow-xs transition-all hover:bg-slate-100 dark:hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+          className="flex h-9.5 w-9.5 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-base font-bold text-slate-800 dark:text-slate-100 shadow-xs transition-all hover:bg-slate-100 dark:hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 cursor-pointer active:scale-95"
           title="Next page"
         >
           ›

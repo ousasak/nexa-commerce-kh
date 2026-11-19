@@ -34,17 +34,17 @@ class HandlePaymentAction
     }
 
     /**
-     * Handle shop owner account linking for real-time payment alerts.
+     * Handle shop owner account linking for real-time payment alerts and sales reports.
      */
-    public function handleLinkAccount(string|int $chatId, string $arguments, ?string $botToken): bool
+    public function handleLinkAccount(string|int $chatId, string $arguments, ?string $botToken, array $userMeta = []): bool
     {
         $parts = preg_split('/\s+/', trim($arguments));
 
         if (count($parts) < 2) {
-            $msg = "⚠️ <b>របៀបភ្ជាប់ Telegram ទទួលដំណឹងបង់ប្រាក់៖</b>\n\n"
+            $msg = "⚠️ <b>របៀបភ្ជាប់ Telegram ទទួលដំណឹងបង់ប្រាក់ និងរបាយការណ៍៖</b>\n\n"
                 . "សូមផ្ញើតាមទម្រង់៖\n"
-                . "<code>/link &lt;Profile_ID&gt; &lt;Secret_Key&gt;</code>\n\n"
-                . "💡 លោកអ្នកអាចចម្លង Profile ID និង Secret Key ចេញពី <b>Dashboard → Telegram Mini App → Payment Alerts</b> ។";
+                . "<code>/link &lt;Profile_ID&gt; &lt;Linking_Token&gt;</code>\n\n"
+                . "💡 លោកអ្នកអាចបង្កើត Linking Token នៅក្នុង <b>Merchant Dashboard → Settings → Telegram Bot</b> ។";
 
             return (bool) $this->apiService->sendMessage($chatId, $msg, null, 'HTML', $botToken);
         }
@@ -52,20 +52,35 @@ class HandlePaymentAction
         $profileId = $parts[0];
         $secretKey = $parts[1];
 
-        $res = $this->coreApiService->linkPaymentChat($profileId, $secretKey, $chatId);
+        $res = $this->coreApiService->linkPaymentChat($profileId, $secretKey, $chatId, $userMeta);
 
         if (!empty($res['ok'])) {
-            $shopName = htmlspecialchars($res['shop_name'] ?? $res['shop_username'] ?? 'ហាងរបស់អ្នក');
-            $reply = "✅ <b>ភ្ជាប់ជោគជ័យ!</b>\n\n"
-                . "Chat នេះត្រូវបានភ្ជាប់ទៅកាន់ <b>{$shopName}</b> ដោយជោគជ័យ។\n"
-                . "រាល់ពេលមានអតិថិជនបង់ប្រាក់តាម ABA KHQR ជោគជ័យ ប្រព័ន្ធនឹងផ្ញើដំណឹងភ្លាមៗមកទីនេះ! 🔔";
-        } else {
-            $detail = htmlspecialchars($res['detail'] ?? 'Profile ID ឬ Secret Key មិនត្រឹមត្រូវទេ។');
-            $reply = "❌ <b>ភ្ជាប់មិនបានសម្រេច!</b>\n\n{$detail}\n\n"
-                . "សូមពិនិត្យមើល Profile ID និង Secret Key នៅក្នុង Merchant Dashboard ឡើងវិញ។";
-        }
+            $shopName = htmlspecialchars($res['shop_name'] ?? $res['shop_username'] ?? 'ហាងរបស់អ្នក', ENT_QUOTES, 'UTF-8');
+            $reply = "✅ <b>ភ្ជាប់ជោគជ័យ! / LINKED SUCCESSFULLY</b>\n\n"
+                . "Chat នេះត្រូវបានភ្ជាប់ទៅកាន់ <b>{$shopName}</b> ដោយជោគជ័យ។\n\n"
+                . "🔔 <b>មុខងារដំណើរការ៖</b>\n"
+                . "• ទទួលដំណឹងភ្លាមៗពេលមានការកុម្ម៉ង់ថ្មី និងការបង់ប្រាក់ KHQR\n"
+                . "• មើលរបាយការណ៍លក់បានគ្រប់ពេល (/today, /weekly, /monthly)\n\n"
+                . "សូមជ្រើសរើសរបាយការណ៍ដែលលោកអ្នកចង់ពិនិត្យមើល៖";
 
-        return (bool) $this->apiService->sendMessage($chatId, $reply, null, 'HTML', $botToken);
+            $reportKeyboard = $this->keyboardService->buildInlineKeyboard([
+                [
+                    ['text' => '📊 ថ្ងៃនេះ (Today)', 'callback_data' => 'report_today'],
+                    ['text' => '📅 ៧ ថ្ងៃ (Weekly)', 'callback_data' => 'report_weekly'],
+                ],
+                [
+                    ['text' => '🗓️ ៣០ ថ្ងៃ (Monthly)', 'callback_data' => 'report_monthly'],
+                ],
+            ]);
+
+            return (bool) $this->apiService->sendMessage($chatId, $reply, $reportKeyboard, 'HTML', $botToken);
+        } else {
+            $detail = htmlspecialchars($res['detail'] ?? 'Profile ID ឬ Secret Key មិនត្រឹមត្រូវទេ។', ENT_QUOTES, 'UTF-8');
+            $reply = "❌ <b>ភ្ជាប់មិនបានសម្រេច!</b>\n\n{$detail}\n\n"
+                . "សូមពិនិត្យមើល Profile ID និង Linking Token នៅក្នុង Merchant Dashboard ឡើងវិញ។";
+
+            return (bool) $this->apiService->sendMessage($chatId, $reply, null, 'HTML', $botToken);
+        }
     }
 
     /**

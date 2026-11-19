@@ -43,6 +43,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "tsc && vite build",
+    "test": "node --test test/*.test.mjs",
     "preview": "vite preview"
   },
   "eslintConfig": {

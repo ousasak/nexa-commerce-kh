@@ -26,6 +26,10 @@ export default defineConfig(({ mode }) => {
           target: env.REACT_APP_API_URL || 'http://localhost:8003',
           changeOrigin: true,
         },
+        '/uploads': {
+          target: env.REACT_APP_API_URL || 'http://localhost:8003',
+          changeOrigin: true,
+        },
       },
     },
     define: {

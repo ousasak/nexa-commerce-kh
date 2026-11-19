@@ -70,28 +70,108 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
       const cashTotal = paymentBreakdown.cashPct;
       const otherTotal = Math.max(0, 100 - khqrTotal - cashTotal);
       return [
-        { label: 'KHQR / Bakong Mobile', pct: khqrTotal || 58, count: `${paymentBreakdown.khqr} orders` },
-        { label: 'Cash on Delivery / Register', pct: cashTotal || 34, count: `${paymentBreakdown.cash} orders` },
-        { label: 'Credit Card / ABA Pay', pct: otherTotal || 8, count: `${paymentBreakdown.other} orders` },
+        {
+          label: t('reports.khqrBakong', 'KHQR / Bakong'),
+          pct: khqrTotal || 58,
+          count: `${paymentBreakdown.khqr} ${t('reports.ordersUnit', 'orders')}`,
+        },
+        {
+          label: t('reports.cashOnHand', 'Cash on Hand'),
+          pct: cashTotal || 34,
+          count: `${paymentBreakdown.cash} ${t('reports.ordersUnit', 'orders')}`,
+        },
+        {
+          label: t('reports.creditCardAba', 'Credit Card / ABA'),
+          pct: otherTotal || 8,
+          count: `${paymentBreakdown.other} ${t('reports.ordersUnit', 'orders')}`,
+        },
       ];
     }
 
     if (distTab === 'channel') {
+      let posCount = 0;
+      let storefrontCount = 0;
+      let telegramCount = 0;
+
+      orders.forEach((o) => {
+        const num = (o.order_number || '').toUpperCase();
+        const isPos = num.startsWith('POS');
+        const isTelegram = Boolean(
+          o.customer_telegram || (o.customer_note || '').toLowerCase().includes('telegram')
+        );
+
+        if (isPos) posCount++;
+        else if (isTelegram) telegramCount++;
+        else storefrontCount++;
+      });
+
+      const totalChannels = posCount + storefrontCount + telegramCount || 1;
+      const posPct = Math.round((posCount / totalChannels) * 100);
+      const telePct = Math.round((telegramCount / totalChannels) * 100);
+      const storePct = Math.max(0, 100 - posPct - telePct);
+
       return [
-        { label: 'In-Store POS Terminal', pct: 54, count: '134 orders' },
-        { label: 'Customer Web Storefront', pct: 28, count: '69 orders' },
-        { label: 'Telegram Bot Orders', pct: 18, count: '45 orders' },
+        {
+          label: t('reports.posInStore', 'POS In-Store'),
+          pct: posCount > 0 ? posPct : 54,
+          count: `${posCount || 134} ${t('reports.ordersUnit', 'orders')}`,
+        },
+        {
+          label: t('reports.onlineStorefront', 'Online Storefront'),
+          pct: storefrontCount > 0 ? storePct : 28,
+          count: `${storefrontCount || 69} ${t('reports.ordersUnit', 'orders')}`,
+        },
+        {
+          label: t('reports.telegramOrder', 'Telegram Order'),
+          pct: telegramCount > 0 ? telePct : 18,
+          count: `${telegramCount || 45} ${t('reports.ordersUnit', 'orders')}`,
+        },
       ];
     }
 
-    // Default: 'category'
+    // Default: 'category' / products breakdown
+    if (products.length > 0) {
+      const totalProdRev = products.reduce((sum, p) => sum + Number(p.revenue || 0), 0) || 1;
+      const sorted = [...products].sort((a, b) => Number(b.revenue || 0) - Number(a.revenue || 0)).slice(0, 4);
+      return sorted.map((p) => {
+        const rev = Number(p.revenue || 0);
+        const pct = Math.min(100, Math.round((rev / totalProdRev) * 100));
+        return {
+          label: p.name,
+          pct: pct || 25,
+          count: `$${rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        };
+      });
+    }
+
     return [
-      { label: 'Main Courses & Food', pct: 45, count: '$8,320.00' },
-      { label: 'Beverages & Coffee', pct: 30, count: '$5,540.00' },
-      { label: 'Bakery & Desserts', pct: 15, count: '$2,770.00' },
-      { label: 'Retail & Merch', pct: 10, count: '$1,820.00' },
+      { label: t('reports.foodBeverages', 'Food & Beverages'), pct: 45, count: '$8,320.00' },
+      { label: t('reports.groceries', 'Groceries'), pct: 30, count: '$5,540.00' },
+      { label: t('reports.bakeryDessert', 'Bakery & Dessert'), pct: 15, count: '$2,770.00' },
+      { label: t('reports.retailGoods', 'Retail & Goods'), pct: 10, count: '$1,820.00' },
     ];
-  }, [distTab, paymentBreakdown]);
+  }, [distTab, paymentBreakdown, orders, products, t]);
+
+  // Mini Stats computed dynamically from orders & salesData
+  const completedOrdersCount = useMemo(() => {
+    const list = orders.filter((o) => {
+      const st = (o.status || '').toLowerCase();
+      const pst = (o.payment_status || '').toLowerCase();
+      return st === 'completed' || pst === 'paid';
+    });
+    return list.length || totalOrdersCount || 0;
+  }, [orders, totalOrdersCount]);
+
+  const cancelledCount = useMemo(() => {
+    return orders.filter((o) =>
+      ['cancelled', 'voided', 'refunded', 'failed'].includes((o.status || '').toLowerCase())
+    ).length;
+  }, [orders]);
+
+  const refundRate = useMemo(() => {
+    const total = orders.length || totalOrdersCount || 1;
+    return ((cancelledCount / total) * 100).toFixed(1);
+  }, [orders, totalOrdersCount, cancelledCount]);
 
   // Chart datasets
   const labels = salesData.length > 0 ? salesData.map((d) => d.date.slice(5)) : ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'];
@@ -102,7 +182,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
     labels,
     datasets: [
       {
-        label: 'Current Period',
+        label: t('reports.currentPeriod', 'Current Period'),
         data: revenuePoints,
         borderColor: '#ea580c', // Spruce Teal
         backgroundColor: 'rgba(31, 120, 111, 0.08)',
@@ -116,7 +196,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
       ...(comparePrevious
         ? [
             {
-              label: 'Previous Period',
+              label: t('reports.previousPeriod', 'Previous Period'),
               data: prevPeriodPoints,
               borderColor: '#9fc1b5', // Soft Sage Teal
               borderDash: [5, 5],
@@ -170,11 +250,11 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
               <BarChart2 className="size-3.5" />
             </div>
             <h3 className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9]">
-              Revenue Distribution
+              {t('reports.revenueDistribution', 'Revenue Distribution')}
             </h3>
           </div>
           <p className="text-xs text-[#71817e] dark:text-[#9fb0ac] mb-4">
-            Where the total store earnings and volume sit.
+            {t('reports.revenueDistributionSub', 'Where the total store earnings and volume sit.')}
           </p>
 
           {/* Segmented Pill Tabs */}
@@ -188,7 +268,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
                   : 'text-[#71817e] hover:text-[#16292e] dark:hover:text-white'
               }`}
             >
-              Category
+              {t('reports.categoryTab', 'Category')}
             </button>
             <button
               type="button"
@@ -199,7 +279,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
                   : 'text-[#71817e] hover:text-[#16292e] dark:hover:text-white'
               }`}
             >
-              Channel
+              {t('reports.channelTab', 'Channel')}
             </button>
             <button
               type="button"
@@ -210,7 +290,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
                   : 'text-[#71817e] hover:text-[#16292e] dark:hover:text-white'
               }`}
             >
-              Payment
+              {t('reports.paymentTab', 'Payment')}
             </button>
           </div>
 
@@ -239,7 +319,7 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
         </div>
 
         <div className="mt-6 pt-3 border-t border-[#dfe7df]/70 dark:border-[#2a4245] flex items-center justify-between text-xs text-[#71817e]">
-          <span>Top contributing source</span>
+          <span>{t('reports.topContributingSource', 'Top contributing source')}</span>
           <span className="font-semibold text-[#ea580c] dark:text-[#f97316]">
             {distributionItems[0]?.label}
           </span>
@@ -257,11 +337,11 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
                   <TrendingUp className="size-3.5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9]">
-                  Business & Order Trend
+                  {t('reports.businessOrderTrend', 'Business & Order Trend')}
                 </h3>
               </div>
               <p className="text-xs text-[#71817e] dark:text-[#9fb0ac]">
-                Revenue growth, order count, and fulfillment performance.
+                {t('reports.businessOrderTrendSub', 'Revenue growth, order count, and fulfillment performance.')}
               </p>
             </div>
 
@@ -269,18 +349,22 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
             <div className="flex items-center gap-3">
               {/* Segmented [Monthly | Quarterly | Yearly] */}
               <div className="flex p-0.5 bg-[#f7f8f2] dark:bg-[#17282b] rounded-lg border border-[#dfe7df] dark:border-[#2a4245]">
-                {(['monthly', 'quarterly', 'yearly'] as const).map((s) => (
+                {[
+                  { id: 'monthly', label: t('reports.monthly', 'Monthly') },
+                  { id: 'quarterly', label: t('reports.quarterly', 'Quarterly') },
+                  { id: 'yearly', label: t('reports.yearly', 'Yearly') },
+                ].map((s) => (
                   <button
-                    key={s}
+                    key={s.id}
                     type="button"
-                    onClick={() => setTrendScale(s)}
+                    onClick={() => setTrendScale(s.id as any)}
                     className={`py-1 px-2.5 rounded-md text-xs font-semibold capitalize transition-all cursor-pointer ${
-                      trendScale === s
+                      trendScale === s.id
                         ? 'bg-[#ea580c] text-white shadow-2xs'
                         : 'text-[#71817e] hover:text-[#16292e] dark:hover:text-white'
                     }`}
                   >
-                    {s}
+                    {s.label}
                   </button>
                 ))}
               </div>
@@ -293,48 +377,50 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
                   onChange={(e) => setComparePrevious(e.target.checked)}
                   className="rounded border-[#dfe7df] text-[#ea580c] focus:ring-[#ea580c]"
                 />
-                <span className="hidden sm:inline">Compare previous</span>
+                <span className="hidden sm:inline">{t('reports.comparePrevious', 'Compare previous')}</span>
               </label>
             </div>
           </div>
 
-          {/* Mini Stats Chips (Headcount, New Hires, Exits, Attrition) */}
+          {/* Mini Stats Chips (Gross Sales, Completed Orders, Void, Refund) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-3 border-y border-[#dfe7df]/70 dark:border-[#2a4245] my-3">
             <div>
-              <p className="text-[11px] text-[#71817e]">Gross Sales</p>
+              <p className="text-[11px] text-[#71817e]">{t('reports.grossSales', 'Gross Sales')}</p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9] font-mono">
-                  ${totalRevenue.toLocaleString()}
+                  ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <span className="text-[10px] text-emerald-600 font-semibold">+4.2%</span>
               </div>
             </div>
 
             <div>
-              <p className="text-[11px] text-[#71817e]">Completed Orders</p>
+              <p className="text-[11px] text-[#71817e]">{t('reports.completedOrders', 'Completed Orders')}</p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9] font-mono">
-                  {totalOrdersCount || 236}
+                  {completedOrdersCount}
                 </span>
                 <span className="text-[10px] text-emerald-600 font-semibold">+3.1%</span>
               </div>
             </div>
 
             <div>
-              <p className="text-[11px] text-[#71817e]">Void / Cancelled</p>
+              <p className="text-[11px] text-[#71817e]">{t('reports.voidCancelled', 'Void / Cancelled')}</p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9] font-mono">
-                  6
+                  {cancelledCount}
                 </span>
-                <span className="text-[10px] text-emerald-600 font-semibold">-2</span>
+                <span className={`text-[10px] font-semibold ${cancelledCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                  {cancelledCount > 0 ? `-${cancelledCount}` : '0'}
+                </span>
               </div>
             </div>
 
             <div>
-              <p className="text-[11px] text-[#71817e]">Refund %</p>
+              <p className="text-[11px] text-[#71817e]">{t('reports.refundPct', 'Refund %')}</p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-sm font-bold text-[#16292e] dark:text-[#e7ede9] font-mono">
-                  1.8%
+                  {refundRate}%
                 </span>
                 <span className="text-[10px] text-emerald-600 font-semibold">-0.4%</span>
               </div>
@@ -351,12 +437,12 @@ export const ReportChartsSection: React.FC<ReportChartsSectionProps> = ({
         <div className="pt-3 border-t border-[#dfe7df]/70 dark:border-[#2a4245] flex items-center gap-4 text-xs text-[#71817e]">
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-[#ea580c]" />
-            <span>Current Period</span>
+            <span>{t('reports.currentPeriod', 'Current Period')}</span>
           </div>
           {comparePrevious && (
             <div className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-[#9fc1b5]" />
-              <span>Previous Period</span>
+              <span>{t('reports.previousPeriod', 'Previous Period')}</span>
             </div>
           )}
         </div>

@@ -416,14 +416,14 @@ class CustomerController extends Controller
 
         $customer = Customer::create([
             'shop_id' => $shopId,
-            'name' => $request->input('name', ''),
-            'phone' => $request->input('phone', ''),
-            'telegram' => $request->input('telegram', ''),
-            'email' => $request->input('email', ''),
-            'address' => $request->input('address', ''),
-            'city' => $request->input('city', ''),
-            'country' => $request->input('country', ''),
-            'notes' => $request->input('notes', ''),
+            'name' => (string) ($request->input('name') ?? ''),
+            'phone' => (string) ($request->input('phone') ?? ''),
+            'telegram' => (string) ($request->input('telegram') ?? ''),
+            'email' => (string) ($request->input('email') ?? ''),
+            'address' => (string) ($request->input('address') ?? ''),
+            'city' => (string) ($request->input('city') ?? ''),
+            'country' => (string) ($request->input('country') ?? ''),
+            'notes' => $request->input('notes'),
         ]);
 
         return response()->json($customer->to_dict());
@@ -439,11 +439,15 @@ class CustomerController extends Controller
 
         ShopHelper::requireShopAccess($customer->shop_id, $user);
 
-        $fields = ['name', 'phone', 'telegram', 'email', 'address', 'city', 'country', 'notes'];
-        foreach ($fields as $f) {
+        $stringFields = ['name', 'phone', 'telegram', 'email', 'address', 'city', 'country'];
+        foreach ($stringFields as $f) {
             if ($request->has($f)) {
-                $customer->{$f} = $request->input($f);
+                $customer->{$f} = (string) ($request->input($f) ?? '');
             }
+        }
+
+        if ($request->has('notes')) {
+            $customer->notes = $request->input('notes');
         }
 
         $customer->save();

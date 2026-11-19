@@ -48,10 +48,15 @@
   "saveChanges": "រក្សាទុកការផ្លាស់ប្តូរ",
   "create": "បង្កើត",
   "cancel": "បោះបង់",
+  "confirmDeleteTitle": "លុបទិន្នន័យ?",
+  "confirmDeleteSubtitle": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+  "confirmDeleteNamedDesc": "តើអ្នកប្រាកដជាចង់លុប \"{{name}}\" នេះមែនទេ? ការលុបនេះមិនអាចត្រឡប់វិញបានទេ។",
+  "confirmDeleteGenericDesc": "តើអ្នកប្រាកដជាចង់លុបទិន្នន័យនេះមែនទេ? ការលុបនេះមិនអាចត្រឡប់វិញបានទេ។",
   "category": "ប្រភេទ",
   "categories": "ប្រភេទផលិតផល",
   "footerNote": "© 2026 MiniStore KH. រៀបចំឡើងដើម្បីការគ្រប់គ្រងហាងកាន់តែប្រសើរ។",
   "breadcrumb": {
+    "Home": "ទំព័រដើម",
     "Settings": "ការកំណត់",
     "Payment (ABA Pay)": "ការទូទាត់ប្រាក់ (ABA Pay)",
     "Telegram Bot": "Telegram Bot (ការជូនដំណឹង)",
@@ -60,7 +65,15 @@
     "Overview": "ទិដ្ឋភាពទូទៅ",
     "Analytics": "ស្ថិតិ & របាយការណ៍",
     "Channels": "បណ្តាញ & ការតភ្ជាប់",
-    "Account": "គណនី"
+    "Account": "គណនី",
+    "Customers": "អតិថិជន",
+    "Orders": "ការបញ្ជាទិញ",
+    "Products": "ផលិតផល",
+    "Categories": "ប្រភេទផលិតផល",
+    "Stock & Inventory": "ស្តុក & ទំនិញ",
+    "Receipts": "វិក្កយបត្រ",
+    "Reports": "របាយការណ៍",
+    "Dashboard": "ផ្ទាំងគ្រប់គ្រង"
   },
   "errorPage": {
     "backToDashboard": "ត្រឡប់ទៅផ្ទាំងគ្រប់គ្រង",

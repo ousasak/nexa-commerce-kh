@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FiCheckCircle, FiPrinter, FiPlus } from 'react-icons/fi';
 import { OrderSuccessState } from './types';
 import { formatUSD, formatKHR } from './posUtils';
 import { useLanguage } from '../../i18n';
 import { Modal, ModalFooter } from '../../components/ui';
+import { Order } from '../../types';
+import ReceiptPrintDocument from '../orders/ReceiptPrintDocument';
+import { printDocumentHtml } from '../../utils/printDocument';
 
 interface POSReceiptModalProps {
   orderSuccess: OrderSuccessState | null;
@@ -14,12 +17,44 @@ interface POSReceiptModalProps {
 export const POSReceiptModal: React.FC<POSReceiptModalProps> = ({
   orderSuccess,
   onNewOrder,
+  isKhmer,
 }) => {
   const { t } = useLanguage();
+  const printRenderRef = useRef<HTMLDivElement>(null);
 
   if (!orderSuccess) return null;
 
+  const posOrder: Order = {
+    id: orderSuccess.orderNumber,
+    order_number: orderSuccess.orderNumber,
+    total: orderSuccess.total,
+    status: 'completed',
+    items_total: orderSuccess.subtotal || orderSuccess.total,
+    payment_method: orderSuccess.method,
+    payment_status: 'paid',
+    order_status: 'completed',
+    currency: 'USD',
+    customer_name: orderSuccess.customerName || (isKhmer ? 'អតិថិជនទូទៅ' : 'Walk-in Customer'),
+    created_at: orderSuccess.createdAt || new Date().toISOString(),
+    paid_at: orderSuccess.createdAt || new Date().toISOString(),
+    items: (orderSuccess.items || []).map((it: any) => ({
+      id: it.id,
+      product_id: it.id,
+      name: it.name,
+      product_name: it.name,
+      price: it.price,
+      quantity: it.quantity,
+    })),
+  };
+
   const handlePrint = () => {
+    const renderNode = printRenderRef.current;
+    if (renderNode && renderNode.innerHTML.trim().length > 0) {
+      printDocumentHtml(renderNode.innerHTML, {
+        title: `POS Receipt #${orderSuccess.orderNumber}`,
+      });
+      return;
+    }
     window.print();
   };
 
@@ -97,6 +132,23 @@ export const POSReceiptModal: React.FC<POSReceiptModalProps> = ({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Hidden Print Staging Stage */}
+        <div
+          ref={printRenderRef}
+          style={{
+            position: 'fixed',
+            top: '-99999px',
+            left: '-99999px',
+            width: '210mm',
+            opacity: 0,
+            pointerEvents: 'none',
+            zIndex: -9999,
+          }}
+          aria-hidden="true"
+        >
+          <ReceiptPrintDocument order={posOrder} />
         </div>
       </div>
     </Modal>

@@ -1,77 +1,90 @@
 import React from 'react';
-import { MoreHorizontal, Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus } from 'lucide-react';
 import { Category } from './category.types';
 import { useLanguage } from '../../i18n';
+import { localizeCategoryName } from './categoryUtils';
+import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog';
 
 interface CategoryRowActionsProps {
   category: Category;
-  isOpen: boolean;
-  onToggle: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
   onEdit: (category: Category) => void;
   onDelete: (id: number, name: string) => void;
 }
 
 export const CategoryRowActions: React.FC<CategoryRowActionsProps> = ({
   category,
-  isOpen,
-  onToggle,
   onEdit,
   onDelete,
 }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="relative flex items-center justify-end gap-1">
-      {/* Quick Edit Icon Button */}
+    <div className="flex items-center justify-end gap-1.5">
+      {/* Edit Button */}
       <button
         type="button"
         onClick={() => onEdit(category)}
         title={t('categories.edit', t('buttons.edit', 'Edit'))}
-        className="size-7.5 rounded-lg flex items-center justify-center text-[#71817e] hover:text-[#ea580c] hover:bg-[#fff7ed] dark:hover:bg-[#1a3437] transition-colors cursor-pointer"
+        className="size-8.5 sm:size-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer shadow-2xs active:scale-95"
       >
-        <Edit2 className="size-3.5" />
+        <Edit2 className="size-4" />
       </button>
 
-      {/* More / Delete Menu */}
-      <div className="relative">
-        <button
-          type="button"
-          onClick={onToggle}
-          title={t('common.more', 'More Options')}
-          className="size-7.5 rounded-lg flex items-center justify-center text-[#71817e] hover:text-[#16292e] dark:hover:text-[#e7ede9] hover:bg-[#eef2ee] dark:hover:bg-[#1f373b] transition-colors cursor-pointer"
-        >
-          <MoreHorizontal className="size-3.5" />
-        </button>
-
-        {isOpen && (
-          <div className="absolute right-0 top-8 z-30 w-36 py-1 bg-white dark:bg-[#16292e] rounded-xl shadow-lg border border-[#dfe7df] dark:border-[#2a4245] animate-in fade-in zoom-in-95 duration-100">
-            <button
-              type="button"
-              onClick={() => {
-                onToggle();
-                onEdit(category);
-              }}
-              className="w-full px-3 py-1.5 text-xs text-left text-[#16292e] dark:text-[#e7ede9] hover:bg-[#f7f8f2] dark:hover:bg-[#1d3539] flex items-center gap-2 cursor-pointer"
-            >
-              <Edit2 className="size-3.5 text-[#71817e]" />
-              <span>{t('categories.edit', t('buttons.edit', 'Edit'))}</span>
-            </button>
-            <div className="my-1 border-t border-[#dfe7df] dark:border-[#2a4245]" />
-            <button
-              type="button"
-              onClick={() => {
-                onToggle();
-                onDelete(category.id, category.name);
-              }}
-              className="w-full px-3 py-1.5 text-xs text-left text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 cursor-pointer"
-            >
-              <Trash2 className="size-3.5" />
-              <span>{t('categories.delete', t('buttons.delete', 'Delete'))}</span>
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Delete Button (Action delete in red) */}
+      <button
+        type="button"
+        onClick={() => onDelete(category.id, category.name)}
+        title={t('categories.delete', t('buttons.delete', 'Delete'))}
+        className="size-8.5 sm:size-9 rounded-xl flex items-center justify-center text-rose-500 hover:text-white border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 hover:bg-rose-600 dark:hover:bg-rose-600 transition-all cursor-pointer shadow-2xs active:scale-95"
+      >
+        <Trash2 className="size-4" />
+      </button>
     </div>
+  );
+};
+
+export interface CategoryDeleteDialogProps {
+  category: Category | null;
+  isDeleting: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+export const CategoryDeleteDialog: React.FC<CategoryDeleteDialogProps> = ({
+  category,
+  isDeleting,
+  onClose,
+  onConfirm,
+}) => {
+  const { t, language } = useLanguage();
+  const isKhmer = language === 'kh';
+
+  const categoryName = category ? localizeCategoryName(category.name, isKhmer, false) : '';
+
+  return (
+    <DeleteConfirmDialog
+      open={Boolean(category)}
+      title={t('categories.confirmDeleteTitle', 'Delete Category?')}
+      description={
+        categoryName
+          ? t(
+              'categories.confirmDeleteNamedDesc',
+              `Are you sure you want to delete category "${categoryName}"? This action cannot be undone.`,
+              { name: categoryName }
+            )
+          : t(
+              'categories.confirmDeleteDesc',
+              'Are you sure you want to delete this category? This action cannot be undone.'
+            )
+      }
+      isDeleting={isDeleting}
+      cancelLabel={t('common.cancel', 'Cancel')}
+      deleteLabel={t('categories.delete', t('common.delete', 'Delete'))}
+      onClose={onClose}
+      onConfirm={onConfirm}
+    />
   );
 };
 
@@ -91,9 +104,9 @@ export const CategoryHeaderActions: React.FC<CategoryHeaderActionsProps> = ({
       style={{
         backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
       }}
-      className="h-9 px-3.5 rounded-lg hover:brightness-90 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer hover:shadow active:scale-[0.98]"
+      className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer hover:shadow active:scale-[0.98]"
     >
-      <Plus className="size-3.5 stroke-[2.5]" />
+      <Plus className="size-4 stroke-[2.5]" />
       <span>{t('categories.addCategory', t('restaurant.addCategory', 'Add Category'))}</span>
     </button>
   );

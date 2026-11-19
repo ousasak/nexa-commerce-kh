@@ -27,11 +27,11 @@ const statusBadge: Record<KitchenOrderStatus, string> = {
 const renderTypeIcon = (type: OrderType) => {
   switch (type) {
     case 'dine-in':
-      return <Utensils className="size-3 text-orange-500" />;
+      return <Utensils className="size-3.5 text-orange-500 shrink-0" />;
     case 'takeaway':
-      return <ShoppingBag className="size-3 text-sky-500" />;
+      return <ShoppingBag className="size-3.5 text-sky-500 shrink-0" />;
     case 'delivery':
-      return <Bike className="size-3 text-emerald-500" />;
+      return <Bike className="size-3.5 text-emerald-500 shrink-0" />;
   }
 };
 
@@ -50,36 +50,36 @@ export const OrderTable: React.FC<OrderTableProps> = ({
   return (
     <div className="rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel overflow-hidden font-sans">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] bg-[#f7f8f2] dark:bg-[#17282b] text-[#71817e] dark:text-[#9fb0ac] font-semibold uppercase tracking-wider text-[11px]">
-              <th className="py-3 px-4 w-12">#</th>
-              <th className="py-3 px-4 min-w-[120px]">{t('restaurant.orderId', 'Order ID')}</th>
+            <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] bg-[#f7f8f2] dark:bg-[#17282b] text-[#71817e] dark:text-[#9fb0ac] font-bold uppercase tracking-wider text-xs">
+              <th className="py-3.5 px-4 w-12">#</th>
+              <th className="py-3.5 px-4 min-w-[130px]">{t('restaurant.orderId', 'Order ID')}</th>
               {visibleColumns.type && (
-                <th className="py-3 px-4 min-w-[110px]">{t('restaurant.type', 'Type')}</th>
+                <th className="py-3.5 px-4 min-w-[120px]">{t('restaurant.type', 'Type')}</th>
               )}
               {visibleColumns.status && (
-                <th className="py-3 px-4 w-28">{t('restaurant.status', 'Status')}</th>
+                <th className="py-3.5 px-4 w-32">{t('restaurant.status', 'Status')}</th>
               )}
               {visibleColumns.for && (
-                <th className="py-3 px-4 min-w-[160px]">{t('restaurant.for', 'Table / Customer')}</th>
+                <th className="py-3.5 px-4 min-w-[170px]">{t('restaurant.for', 'Table / Customer')}</th>
               )}
               {visibleColumns.items && (
-                <th className="py-3 px-4 min-w-[200px]">{t('restaurant.items', 'Items')}</th>
+                <th className="py-3.5 px-4 min-w-[220px]">{t('restaurant.items', 'Items')}</th>
               )}
               {visibleColumns.total && (
-                <th className="py-3 px-4 w-24">{t('restaurant.total', 'Total')}</th>
+                <th className="py-3.5 px-4 w-28">{t('restaurant.total', 'Total')}</th>
               )}
               {visibleColumns.placedAt && (
-                <th className="py-3 px-4 w-24">{t('restaurant.placedAt', 'Placed At')}</th>
+                <th className="py-3.5 px-4 w-28">{t('restaurant.placedAt', 'Placed At')}</th>
               )}
-              <th className="py-3 px-4 w-16 text-right">{t('common.actions', 'Actions')}</th>
+              <th className="py-3.5 px-4 w-20 text-right">{t('common.actions', 'Actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-slate-400">
+                <td colSpan={9} className="py-12 text-center text-slate-400 font-medium">
                   {t('restaurant.noOrdersFound', 'No orders found')}
                 </td>
               </tr>
@@ -91,26 +91,26 @@ export const OrderTable: React.FC<OrderTableProps> = ({
                 return (
                   <tr
                     key={order.id}
-                    className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{rowNum}</td>
-                    <td className="py-3 px-4">
-                      <span className="font-mono font-semibold text-slate-900 dark:text-white">
+                    <td className="py-3.5 px-4 text-slate-400 font-mono text-xs font-semibold">{rowNum}</td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
                         {order.id}
                       </span>
                     </td>
                     {visibleColumns.type && (
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 capitalize">
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 capitalize">
                           {renderTypeIcon(order.type)}
                           <span>{order.type}</span>
                         </span>
                       </td>
                     )}
                     {visibleColumns.status && (
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${
+                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold capitalize ${
                             statusBadge[order.status]
                           }`}
                         >
@@ -119,36 +119,36 @@ export const OrderTable: React.FC<OrderTableProps> = ({
                       </td>
                     )}
                     {visibleColumns.for && (
-                      <td className="py-3 px-4">
-                        <div className="font-medium text-slate-900 dark:text-white">
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-slate-900 dark:text-white text-sm">
                           {order.tableNumber || order.customerName || '—'}
                         </div>
                         {order.tableNumber && order.customerName && (
-                          <div className="text-[10px] text-slate-400">{order.customerName}</div>
+                          <div className="text-xs text-slate-400 mt-0.5">{order.customerName}</div>
                         )}
                       </td>
                     )}
                     {visibleColumns.items && (
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        <div className="truncate max-w-[240px]">
+                      <td className="py-3.5 px-4 text-slate-700 dark:text-slate-200">
+                        <div className="truncate max-w-[260px] font-medium text-sm">
                           {order.items.map((it) => `${it.quantity}x ${it.name}`).join(', ')}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-xs text-slate-400 mt-0.5">
                           {itemCount} {itemCount === 1 ? 'item' : 'items'}
                         </div>
                       </td>
                     )}
                     {visibleColumns.total && (
-                      <td className="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-white">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                         ${order.total.toFixed(2)}
                       </td>
                     )}
                     {visibleColumns.placedAt && (
-                      <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                      <td className="py-3.5 px-4 text-slate-500 font-mono text-xs font-medium">
                         {order.placedAt}
                       </td>
                     )}
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <OrderRowActions order={order} onView={onView} />
                     </td>
                   </tr>

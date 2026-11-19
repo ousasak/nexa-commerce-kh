@@ -64,44 +64,44 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <div className="rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel overflow-hidden font-sans">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] bg-[#f7f8f2] dark:bg-[#17282b] text-[#71817e] dark:text-[#9fb0ac] font-semibold uppercase tracking-wider text-[11px]">
-              <th className="py-3 px-4 w-12">#</th>
-              <th className="py-3 px-4 min-w-[220px]">
+            <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] bg-[#f7f8f2] dark:bg-[#17282b] text-[#71817e] dark:text-[#9fb0ac] font-bold uppercase tracking-wider text-xs">
+              <th className="py-3.5 px-4 w-12">#</th>
+              <th className="py-3.5 px-4 min-w-[220px]">
                 <button
                   type="button"
                   onClick={() => onSort('name')}
-                  className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <span>{t('products.product', 'Product')}</span>
-                  <ArrowUpDown className="size-3" />
+                  <ArrowUpDown className="size-3.5" />
                 </button>
               </th>
               {visibleColumns.category && (
-                <th className="py-3 px-4 min-w-[130px]">{t('products.category', 'Category')}</th>
+                <th className="py-3.5 px-4 min-w-[130px]">{t('products.category', 'Category')}</th>
               )}
               {visibleColumns.price && (
-                <th className="py-3 px-4 w-28">
+                <th className="py-3.5 px-4 w-28">
                   <button
                     type="button"
                     onClick={() => onSort('price')}
-                    className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     <span>{t('products.price', 'Price')}</span>
-                    <ArrowUpDown className="size-3" />
+                    <ArrowUpDown className="size-3.5" />
                   </button>
                 </th>
               )}
               {visibleColumns.stock && (
-                <th className="py-3 px-4 w-28">
+                <th className="py-3.5 px-4 w-28">
                   <button
                     type="button"
                     onClick={() => onSort('stock')}
-                    className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     <span>{t('products.stock', 'Stock')}</span>
-                    <ArrowUpDown className="size-3" />
+                    <ArrowUpDown className="size-3.5" />
                   </button>
                 </th>
               )}
@@ -141,10 +141,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                 return (
                   <tr
                     key={p.id}
-                    className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{rowNum}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4 text-slate-400 font-mono text-xs font-semibold">{rowNum}</td>
+                    <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         {thumb ? (
                           <button
@@ -157,7 +157,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                                 price: p.sale_price ?? p.price,
                               })
                             }
-                            className="size-10 rounded-lg overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shrink-0 relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-slate-100 dark:bg-slate-800"
+                            className="size-11 rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shrink-0 relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-slate-100 dark:bg-slate-800"
                             title={isKhmer ? 'ចុចដើម្បីមើលរូបភាពធំ' : 'Click to preview image'}
                           >
                             <img
@@ -169,18 +169,18 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                               }}
                             />
                             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <ZoomIn className="size-3.5 text-white drop-shadow-xs" />
+                              <ZoomIn className="size-4 text-white drop-shadow-xs" />
                             </div>
                           </button>
                         ) : (
-                          <div className="size-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden flex items-center justify-center shrink-0">
-                            <Package className="size-4 text-slate-400" />
+                          <div className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden flex items-center justify-center shrink-0">
+                            <Package className="size-5 text-slate-400" />
                           </div>
                         )}
                         <div className="min-w-0">
                           <Link
                             to={`/products/${p.id}/edit`}
-                            className="font-semibold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 truncate block"
+                            className="font-semibold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 truncate block text-sm"
                           >
                             {p.name}
                           </Link>
@@ -192,32 +192,32 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                       </div>
                     </td>
                     {visibleColumns.category && (
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                      <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 text-sm font-medium">
                         {p.category_name ? (
                           localizeCategoryName(p.category_name, isKhmer, true)
                         ) : (
-                          <span className="text-slate-400 italic text-[11px]">
+                          <span className="text-slate-400 italic text-xs">
                             {t('products.uncategorized', t('categories.uncategorized', 'Uncategorized'))}
                           </span>
                         )}
                       </td>
                     )}
                     {visibleColumns.price && (
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-900 dark:text-white font-mono">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-900 dark:text-white font-mono text-sm sm:text-base">
                           {GlobalFormat.currency(p.sale_price ?? p.price)}
                         </div>
                         {p.sale_price && p.sale_price < p.price && (
-                          <div className="text-[10px] text-slate-400 line-through font-mono">
+                          <div className="text-xs text-slate-400 line-through font-mono">
                             {GlobalFormat.currency(p.price)}
                           </div>
                         )}
                       </td>
                     )}
                     {visibleColumns.stock && (
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1 font-mono font-medium ${
+                          className={`inline-flex items-center gap-1 font-mono font-semibold text-sm ${
                             isOutOfStock
                               ? 'text-rose-600 dark:text-rose-400'
                               : isLowStock
@@ -226,15 +226,15 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                           }`}
                         >
                           <span>{p.quantity}</span>
-                          {isOutOfStock && <span className="text-[10px]">(Out)</span>}
-                          {isLowStock && <span className="text-[10px]">(Low)</span>}
+                          {isOutOfStock && <span className="text-xs font-bold">(Out)</span>}
+                          {isLowStock && <span className="text-xs font-bold">(Low)</span>}
                         </span>
                       </td>
                     )}
                     {visibleColumns.status && (
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${
                             isActive
                               ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700'
@@ -244,7 +244,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                         </span>
                       </td>
                     )}
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <ProductRowActions
                         product={p}
                         isOpen={openDropdownId === p.id}

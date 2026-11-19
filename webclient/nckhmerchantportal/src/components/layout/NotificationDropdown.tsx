@@ -87,7 +87,11 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-export const NotificationDropdown: React.FC = () => {
+export interface NotificationDropdownProps {
+  isNavbarDark?: boolean;
+}
+
+export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isNavbarDark = false }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
@@ -121,21 +125,31 @@ export const NotificationDropdown: React.FC = () => {
                     'color-mix(in srgb, var(--primary-hex, #ec4899) 45%, transparent)',
                   boxShadow:
                     '0 0 0 2px color-mix(in srgb, var(--primary-hex, #ec4899) 20%, transparent)',
+                  backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.06)',
+                  color: isNavbarDark ? 'var(--navbar-text, #f8fafc)' : 'var(--navbar-text, #1e293b)',
                 }
-              : undefined
+              : {
+                  borderColor: isNavbarDark ? 'rgba(255, 255, 255, 0.15)' : 'var(--navbar-border, rgba(0, 0, 0, 0.08))',
+                  color: isNavbarDark ? 'var(--navbar-text, #f8fafc)' : 'var(--navbar-text, #1e293b)',
+                  backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+                }
           }
-          className={`size-8 rounded-lg flex items-center justify-center transition-all cursor-pointer relative ${
+          className={`size-10 rounded-xl flex items-center justify-center transition-all cursor-pointer relative border ${
             open
-              ? 'bg-[#f7f8f2] dark:bg-[#17282b] text-[#16292e] dark:text-white border'
-              : 'hover:bg-slate-100 dark:hover:bg-[#1d3134] text-[#71817e] hover:text-[#16292e] dark:text-[#9fb0ac] dark:hover:text-white'
+              ? ''
+              : isNavbarDark
+              ? 'hover:bg-white/20'
+              : 'hover:bg-black/8'
           }`}
           title="Notifications"
         >
-          <FiBell className="size-4" />
+          <FiBell className="size-4.5" />
           {unreadCount > 0 && (
             <span
               style={{ backgroundColor: 'var(--primary-hex, #ec4899)' }}
-              className="absolute top-1.5 right-1.5 size-1.5 rounded-full ring-2 ring-white dark:ring-[#142629] animate-pulse"
+              className={`absolute top-2 right-2 size-2 rounded-full animate-pulse ${
+                isNavbarDark ? 'ring-2 ring-black/40' : 'ring-2 ring-white'
+              }`}
             />
           )}
         </button>

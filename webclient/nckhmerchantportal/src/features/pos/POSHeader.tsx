@@ -150,7 +150,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({
         </button>
 
         {/* Language Switcher */}
-        <LanguageSwitcher />
+        <LanguageSwitcher isNavbarDark={isDark} className="h-8 rounded-lg text-xs" />
 
         {/* Dashboard Shortcut Button */}
         <button

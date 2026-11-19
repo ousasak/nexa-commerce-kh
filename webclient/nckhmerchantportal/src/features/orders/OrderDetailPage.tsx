@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from '../../utils/toast';
 import { FiDownload, FiPrinter, FiArrowLeft, FiPackage, FiFileText } from 'react-icons/fi';
@@ -13,6 +13,8 @@ import { Empty } from '../../components/common/Empty';
 import { Loading } from '../../components/common/Loading';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import HttpErrorPage from '../../components/shared/HttpErrorPage';
+import ReceiptPrintDocument from './ReceiptPrintDocument';
+import { printDocumentHtml } from '../../utils/printDocument';
 
 const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'];
@@ -25,6 +27,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [generatingReceipt, setGeneratingReceipt] = useState(false);
+  const printRenderRef = useRef<HTMLDivElement>(null);
 
   const load = () => {
     if (!id) return;
@@ -76,6 +79,13 @@ export default function OrderDetailPage() {
 
   const printReceipt = () => {
     if (!order) return;
+    const renderNode = printRenderRef.current;
+    if (renderNode && renderNode.innerHTML.trim().length > 0) {
+      printDocumentHtml(renderNode.innerHTML, {
+        title: `Receipt #${order.order_number || order.id}`,
+      });
+      return;
+    }
     const lang = language === 'kh' ? 'km' : 'en';
     const win = window.open(fullUrl(`/api/orders/${order.id}/receipt?lang=${lang}`), '_blank');
     if (win) win.onload = () => win.print();
@@ -186,12 +196,10 @@ export default function OrderDetailPage() {
             <FiDownload className="w-4 h-4 mr-1.5" />
             {language === 'kh' ? 'បង្កើត PDF Receipt' : 'Generate PDF Receipt'}
           </Button>
-          {order.receipt_url && (
-            <Button onClick={printReceipt} variant="outline">
-              <FiPrinter className="w-4 h-4 mr-1.5" />
-              {language === 'kh' ? 'បោះពុម្ព' : 'Print'}
-            </Button>
-          )}
+          <Button onClick={printReceipt} variant="outline">
+            <FiPrinter className="w-4 h-4 mr-1.5" />
+            {language === 'kh' ? 'បោះពុម្ព' : 'Print'}
+          </Button>
         </div>
       </div>
 
@@ -345,6 +353,23 @@ export default function OrderDetailPage() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Hidden Print Staging Stage */}
+      <div
+        ref={printRenderRef}
+        style={{
+          position: 'fixed',
+          top: '-99999px',
+          left: '-99999px',
+          width: '210mm',
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: -9999,
+        }}
+        aria-hidden="true"
+      >
+        <ReceiptPrintDocument order={order} />
       </div>
     </div>
   );

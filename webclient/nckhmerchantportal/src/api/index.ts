@@ -19,6 +19,9 @@ export { api, API_BASE, fullUrl };
 // Re-export individual functions for 100% backward compatibility
 export const login = authService.login;
 export const changePassword = authService.changePassword;
+export const googleVerifyIdentity = authService.googleVerifyIdentity;
+export const googleVerifyOtp = authService.googleVerifyOtp;
+export const googleResendOtp = authService.googleResendOtp;
 
 export const getShopDetail = shopService.getDetail;
 export const updateShop = shopService.update;
@@ -65,6 +68,11 @@ export const confirmPlan = paymentService.confirmPlan;
 export const testTelegram = telegramService.test;
 export const getTelegramSettings = telegramService.getSettings;
 export const setTelegramWebhook = telegramService.setWebhook;
+export const unlinkTelegramChat = telegramService.unlinkChat;
+export const disconnectTelegramAccount = telegramService.disconnectAccount;
+export const generateTelegramLinkingToken = telegramService.generateLinkingToken;
+export const updateTelegramPreferences = telegramService.updatePreferences;
+export const sendTelegramStockAlert = telegramService.sendStockAlert;
 
 export const createShopBackup = backupService.create;
 export const exportShopBackup = backupService.export;

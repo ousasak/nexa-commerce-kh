@@ -27,7 +27,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <LanguageSwitcher />
+          <LanguageSwitcher isNavbarDark={isDark} className="h-9 rounded-lg" />
           <button
             onClick={toggleTheme}
             type="button"

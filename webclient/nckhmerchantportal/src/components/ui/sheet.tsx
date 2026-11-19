@@ -1,8 +1,8 @@
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { cva, type VariantProps } from "class-variance-authority"
-import { FiX } from "react-icons/fi"
 import { cn } from "../../lib/utils"
+import { CloseButton } from "./CloseButton"
 
 const Sheet = SheetPrimitive.Root
 
@@ -62,9 +62,13 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 size-7 rounded-lg bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center shadow-xs transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:ring-offset-1 disabled:pointer-events-none cursor-pointer z-50">
-        <FiX className="h-4 w-4 text-white stroke-[2.5]" />
-        <span className="sr-only">Close</span>
+      <SheetPrimitive.Close asChild>
+        <CloseButton
+          size="sm"
+          shape="circle"
+          color="default"
+          className="!absolute !right-3.5 !top-3.5 sm:!top-4 z-50 !w-7 !h-7 min-w-[28px] min-h-[28px]"
+        />
       </SheetPrimitive.Close>
     </SheetPrimitive.Content>
   </SheetPortal>

@@ -32,6 +32,8 @@ const ROUTE_CONFIG: Record<string, { category: string; categoryHref?: string; ti
   '/reports': { category: 'Analytics', categoryHref: '/reports', title: 'Reports' },
   '/receipts': { category: 'Commerce', categoryHref: '/receipts', title: 'Receipts' },
   '/settings': { category: 'Settings', categoryHref: '/settings', title: 'Shop Settings' },
+  '/theme': { category: 'Channels', categoryHref: '/theme', title: 'Storefront Design' },
+  '/storefront/theme': { category: 'Channels', categoryHref: '/theme', title: 'Storefront Design' },
   '/payment': { category: 'Settings', categoryHref: '/settings', title: 'Payment (ABA Pay)' },
   '/telegram': { category: 'Channels', categoryHref: '/telegram', title: 'Telegram Bot' },
   '/backup': { category: 'Settings', categoryHref: '/settings', title: 'Backup & Restore' },
@@ -128,21 +130,21 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        'flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-sans select-none',
+        'flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-sans select-none',
         className
       )}
     >
-      <ol className="flex items-center gap-1.5 flex-wrap">
+      <ol className="flex items-center gap-2 flex-wrap">
         {/* Home Item */}
         {showHome && (
-          <li className="flex items-center gap-1.5">
+          <li className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => navigate(homeHref)}
               className="flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer transition-colors outline-none group"
               title={homeLabel}
             >
-              <FiHome className="size-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+              <FiHome className="size-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
               <span>{t('nav.home', homeLabel)}</span>
             </button>
             {computedItems.length > 0 && (
@@ -157,10 +159,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
           const Icon = item.icon;
 
           return (
-            <li key={index} className="flex items-center gap-1.5">
+            <li key={index} className="flex items-center gap-2">
               {isLast ? (
-                <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center gap-1 cursor-default">
-                  {Icon && <Icon className="size-3 text-slate-500" />}
+                <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center gap-1.5 cursor-default">
+                  {Icon && <Icon className="size-3.5 text-slate-500" />}
                   <span>{t(`breadcrumb.${item.label}`, item.label)}</span>
                 </span>
               ) : (
@@ -171,11 +173,11 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                     else if (item.href) navigate(item.href);
                   }}
                   className={cn(
-                    'hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1 outline-none',
+                    'hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1.5 outline-none',
                     item.href || item.onClick ? 'cursor-pointer' : 'cursor-default text-slate-500 dark:text-slate-400'
                   )}
                 >
-                  {Icon && <Icon className="size-3 text-slate-400" />}
+                  {Icon && <Icon className="size-3.5 text-slate-400" />}
                   <span>{t(`breadcrumb.${item.label}`, item.label)}</span>
                 </button>
               )}

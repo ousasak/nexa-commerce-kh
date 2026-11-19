@@ -18,6 +18,7 @@ import ReceiptsPage from './features/orders/ReceiptsPage';
 import CustomersPage from './features/customers/CustomersPage';
 import ReportsPage from './features/reports/ReportsPage';
 import ShopSettingsPage from './features/settings/ShopSettingsPage';
+import StorefrontThemePage from './features/settings/StorefrontThemePage';
 import PaymentSettingsPage from './features/settings/PaymentSettingsPage';
 import TelegramSettingsPage from './features/settings/TelegramSettingsPage';
 import UpgradePlanPage from './features/settings/UpgradePlanPage';
@@ -97,6 +98,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="receipts" element={<ReceiptsPage />} />
         <Route path="settings" element={<ShopSettingsPage />} />
+        <Route path="theme" element={<StorefrontThemePage />} />
+        <Route path="storefront/theme" element={<StorefrontThemePage />} />
         <Route path="payment" element={<PaymentSettingsPage />} />
         <Route path="telegram" element={<TelegramSettingsPage />} />
         <Route path="backup" element={<BackupPage />} />

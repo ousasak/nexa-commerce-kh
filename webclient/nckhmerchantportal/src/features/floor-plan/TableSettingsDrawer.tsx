@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pencil, Trash2, Plus, ChevronDown, Check } from 'lucide-react';
+import { Pencil, Trash2, Plus, ChevronDown, Check, RotateCcw } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -21,7 +21,7 @@ export const TableSettingsDrawer: React.FC<TableSettingsDrawerProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { tables, addTable, updateTable, deleteTable } = useRestaurantStore();
+  const { tables, addTable, updateTable, deleteTable, resetTablesToDefaults } = useRestaurantStore();
   const { t } = useLanguage();
 
   const [editingTable, setEditingTable] = useState<RestaurantTable | null>(null);
@@ -29,6 +29,17 @@ export const TableSettingsDrawer: React.FC<TableSettingsDrawerProps> = ({
   const [section, setSection] = useState<TableSection | ''>('Main Dining');
   const [seats, setSeats] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetTables = async () => {
+    if (window.confirm(t('restaurant.confirmResetTables', 'Reset all tables to standard 18-table template?'))) {
+      setIsResetting(true);
+      await resetTablesToDefaults();
+      setIsResetting(false);
+      handleCancelEdit();
+      toast.success(t('restaurant.tablesReset', 'Tables reset to standard template'));
+    }
+  };
 
   const handleStartEdit = (table: RestaurantTable) => {
     setEditingTable(table);
@@ -120,10 +131,22 @@ export const TableSettingsDrawer: React.FC<TableSettingsDrawerProps> = ({
         className="w-full sm:max-w-md h-full flex flex-col p-6 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800"
       >
         {/* Header */}
-        <SheetHeader className="text-left pb-4 border-b border-slate-100 dark:border-slate-800">
-          <SheetTitle className="text-base font-semibold text-slate-900 dark:text-white">
-            {t('restaurant.tableSettingsTitle', 'Table Settings')}
-          </SheetTitle>
+        <SheetHeader className="text-left pb-4 border-b border-slate-100 dark:border-slate-800 pr-10">
+          <div className="flex items-center justify-between gap-3">
+            <SheetTitle className="text-base font-bold text-slate-900 dark:text-white">
+              {t('restaurant.tableSettingsTitle', 'Table Settings')}
+            </SheetTitle>
+            <button
+              type="button"
+              onClick={handleResetTables}
+              disabled={isResetting}
+              title={t('restaurant.resetTables', 'Reset to 18-Table Template')}
+              className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer disabled:opacity-50 shadow-2xs shrink-0"
+            >
+              <RotateCcw className={`size-3 text-slate-400 ${isResetting ? 'animate-spin' : ''}`} />
+              <span>{t('restaurant.resetTemplate', 'Reset Template')}</span>
+            </button>
+          </div>
           <SheetDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
             {t(
               'restaurant.tableSettingsSubtitle',
@@ -160,23 +183,26 @@ export const TableSettingsDrawer: React.FC<TableSettingsDrawerProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5">
+                    {/* Edit button */}
                     <button
                       type="button"
                       onClick={() => handleStartEdit(table)}
                       title={t('common.edit', 'Edit table')}
-                      className={`size-7 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${
+                      className={`size-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95 ${
                         isEditing
-                          ? 'border-orange-500 bg-orange-600 text-white'
-                          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          ? 'border-primary bg-primary text-white shadow-xs'
+                          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       <Pencil className="size-3.5" />
                     </button>
+
+                    {/* Delete button (styled like edit design: clean border and neutral resting state) */}
                     <button
                       type="button"
                       onClick={() => handleDelete(table)}
                       title={t('common.delete', 'Delete table')}
-                      className="size-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
+                      className="size-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-300 dark:hover:border-rose-800 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
                     >
                       <Trash2 className="size-3.5" />
                     </button>
@@ -283,16 +309,19 @@ export const TableSettingsDrawer: React.FC<TableSettingsDrawerProps> = ({
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full h-9 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-[0.99]"
+              style={{
+                backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
+              }}
+              className="w-full h-10 rounded-xl hover:brightness-90 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer active:scale-[0.99]"
             >
               {editingTable ? (
                 <>
-                  <Check className="size-3.5" />
+                  <Check className="size-4 stroke-[2.5]" />
                   <span>{t('restaurant.saveChanges', 'Save Changes')}</span>
                 </>
               ) : (
                 <>
-                  <Plus className="size-3.5" />
+                  <Plus className="size-4 stroke-[2.5]" />
                   <span>{t('restaurant.addTable', 'Add Table')}</span>
                 </>
               )}

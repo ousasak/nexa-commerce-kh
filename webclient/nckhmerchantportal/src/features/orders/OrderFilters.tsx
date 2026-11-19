@@ -40,10 +40,10 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
+    <div className="flex flex-wrap items-center gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
       {/* 1. Search Box (Reference: 🔍 Search name, title, ID...) */}
       <div className="relative w-full sm:w-64 md:w-72">
-        <Search className="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="search"
           value={search}
@@ -52,7 +52,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
             setCurrentPage(1);
           }}
           placeholder={t('restaurant.searchOrders', 'Search order ID, table, customer...')}
-          className="h-9 w-full pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+          className="h-10 sm:h-10.5 w-full pl-10 pr-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
         />
       </div>
 
@@ -64,7 +64,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+          className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
         >
           <option value="all">{t('common.allStatuses', 'All Statuses')}</option>
           <option value="new">{t('restaurant.statusNew', 'New')}</option>
@@ -73,7 +73,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
           <option value="served">{t('restaurant.statusServed', 'Served')}</option>
           <option value="cancelled">{t('common.cancelled', 'Cancelled')}</option>
         </select>
-        <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
 
       {/* 3. Type Dropdown */}
@@ -84,14 +84,14 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
             setTypeFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+          className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
         >
           <option value="all">{t('restaurant.allTypes', 'All Types')}</option>
           <option value="dine-in">{t('restaurant.dineIn', 'Dine-in')}</option>
           <option value="takeaway">{t('restaurant.takeaway', 'Takeaway')}</option>
           <option value="delivery">{t('restaurant.delivery', 'Delivery')}</option>
         </select>
-        <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
 
       {/* 4. Apply Button (Reference: ✓ Apply) */}
@@ -101,9 +101,9 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
         style={{
           backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
         }}
-        className="h-9 px-3.5 rounded-lg hover:brightness-90 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95"
+        className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
       >
-        <Check className="size-3.5 stroke-[2.5]" />
+        <Check className="size-4 stroke-[2.5]" />
         <span>{t('buttons.apply', t('common.apply', 'Apply'))}</span>
       </button>
 
@@ -111,7 +111,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
       <button
         type="button"
         onClick={handleReset}
-        className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer active:scale-95"
+        className="h-10 sm:h-10.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
       >
         {t('buttons.reset', t('common.reset', 'Reset'))}
       </button>

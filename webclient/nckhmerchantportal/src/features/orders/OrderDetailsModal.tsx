@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Utensils, ShoppingBag, Bike, Calendar, Clock, DollarSign, Printer, CheckCircle } from 'lucide-react';
 import { KitchenOrder } from '../../types/restaurant';
 import { useLanguage } from '../../i18n';
+import { useAuth } from '../../hooks/useAuth';
 import { Modal, ModalFooter } from '../../components/ui';
+import { GlobalPrintDocument, GlobalPrintColumn } from '../../components/common/GlobalPrintDocument';
+import { printDocumentHtml } from '../../utils/printDocument';
 
 interface OrderDetailsModalProps {
   order: KitchenOrder | null;
@@ -11,11 +14,20 @@ interface OrderDetailsModalProps {
 }
 
 export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, onClose }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const printRenderRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen || !order) return null;
 
   const handlePrint = () => {
+    const renderNode = printRenderRef.current;
+    if (renderNode && renderNode.innerHTML.trim().length > 0) {
+      printDocumentHtml(renderNode.innerHTML, {
+        title: `Kitchen Ticket #${order.id}`,
+      });
+      return;
+    }
     window.print();
   };
 
@@ -126,6 +138,105 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isO
           <span className="text-base font-mono text-orange-600 dark:text-orange-400">
             ${order.total?.toFixed(2) || '0.00'}
           </span>
+        </div>
+
+        {/* Hidden Print Staging Stage */}
+        <div
+          ref={printRenderRef}
+          style={{
+            position: 'fixed',
+            top: '-99999px',
+            left: '-99999px',
+            width: '210mm',
+            opacity: 0,
+            pointerEvents: 'none',
+            zIndex: -9999,
+          }}
+          aria-hidden="true"
+        >
+          <GlobalPrintDocument
+            language={language}
+            store={{
+              name: (user as any)?.shop_name || (user as any)?.shop?.name || user?.username || 'Restro Food & Coffee KH',
+              tagline: language === 'kh' ? 'ភោជនីយដ្ឋាន និងហាងកាហ្វេ' : 'Restaurant & Coffee Bar',
+              phone: (user as any)?.shop?.contact || '+855 (0) 23 888 888',
+              address: (user as any)?.shop?.address || (language === 'kh' ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh'),
+            }}
+            document={{
+              title: language === 'kh' ? 'ប័ណ្ណកុម្ម៉ង់ផ្ទះបាយ / សំបុត្រតុ' : 'Kitchen Order Ticket',
+              subtitle: language === 'kh' ? 'បង្កាន់ដៃបញ្ជាទិញបន្ទាន់' : 'Live Kitchen Ticket',
+              referenceNumber: `#${order.id}`,
+              date: order.placedAt || new Date().toLocaleString(),
+              statusBadge: {
+                text: order.status,
+                variant: 'completed',
+              },
+              channelLabel: order.type || 'Dine-In',
+            }}
+            infoCards={[
+              {
+                title: language === 'kh' ? 'ព័ត៌មានតុ / ការកុម្ម៉ង់' : 'Order Information',
+                badge: order.type,
+                rows: [
+                  { label: language === 'kh' ? 'លេខតុ៖' : 'Table #:', value: order.tableNumber || '—' },
+                  { label: language === 'kh' ? 'ប្រភេទ៖' : 'Type:', value: order.type },
+                  { label: language === 'kh' ? 'អតិថិជន៖' : 'Customer:', value: order.customerName || (language === 'kh' ? 'អតិថិជនទូទៅ' : 'Walk-in') },
+                ],
+              },
+              {
+                title: language === 'kh' ? 'ព័ត៌មានប្រតិបត្តិការ' : 'Ticket Details',
+                rows: [
+                  { label: language === 'kh' ? 'លេខសំបុត្រ៖' : 'Ticket ID:', value: `#${order.id}` },
+                  { label: language === 'kh' ? 'ពេលវេលា៖' : 'Time:', value: order.placedAt || '—' },
+                  { label: language === 'kh' ? 'ស្ថានភាព៖' : 'Status:', value: order.status },
+                ],
+              },
+            ]}
+            columns={[
+              { key: 'idx', title: '#', align: 'center', width: 'w-10', render: (_, i) => <span>{i + 1}</span> },
+              {
+                key: 'name',
+                title: language === 'kh' ? 'ឈ្មោះម្ហូប / ភេសជ្ជៈ' : 'Item Description',
+                align: 'left',
+                render: (it) => (
+                  <div>
+                    <span className="font-bold text-slate-900">{it.name}</span>
+                    {it.options && it.options.length > 0 && (
+                      <span className="text-[8.5px] text-orange-600 block italic">({it.options.join(', ')})</span>
+                    )}
+                  </div>
+                ),
+              },
+              { key: 'quantity', title: language === 'kh' ? 'ចំនួន' : 'Qty', align: 'center' },
+              {
+                key: 'price',
+                title: language === 'kh' ? 'តម្លៃឯកតា' : 'Unit Price',
+                align: 'right',
+                render: (it) => <span>${Number(it.price || 0).toFixed(2)}</span>,
+              },
+              {
+                key: 'total',
+                title: language === 'kh' ? 'សរុប' : 'Total',
+                align: 'right',
+                render: (it) => {
+                  const tot = (it.price || 0) * (it.quantity || 1);
+                  return <span className="font-bold text-slate-900">${tot.toFixed(2)}</span>;
+                },
+              },
+            ]}
+            rows={order.items || []}
+            summary={{
+              notesTitle: language === 'kh' ? 'កំណត់ចំណាំចុងភៅ' : 'Kitchen Instructions',
+              notesText: language === 'kh' ? '* សូមរៀបចំម្ហូបតាមលំដាប់លំដោយ និងត្រួតពិនិត្យឱ្យបានម៉ត់ចត់មុនពេលលើកជូនភ្ញៀវ។' : '* Please prepare dishes promptly according to kitchen standards.',
+              rows: [
+                {
+                  label: language === 'kh' ? 'សរុបរួម (Grand Total):' : 'Grand Total:',
+                  valueUsd: order.total || 0,
+                  isTotal: true,
+                },
+              ],
+            }}
+          />
         </div>
       </div>
     </Modal>

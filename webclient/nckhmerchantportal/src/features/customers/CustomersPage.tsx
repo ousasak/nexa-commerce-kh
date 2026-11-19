@@ -262,71 +262,71 @@ export default function CustomersPage() {
       {/* KPI Stat Cards (SmartHR Design Pattern) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Card 1: Total Customers */}
-        <div className="p-4 rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel">
-          <div className="flex items-center justify-between mb-2">
-            <div className="size-8.5 rounded-lg bg-[#ea580c]/10 dark:bg-[#ea580c]/20 text-[#ea580c] flex items-center justify-center">
-              <Users className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel transition-all hover:shadow-md">
+          <div className="flex items-center justify-between mb-3">
+            <div className="size-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
+              <Users className="size-5" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#fff7ed] dark:bg-[#1a3437] text-[#ea580c]">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60">
               {t('customers.allClients', 'ALL CLIENTS')}
             </span>
           </div>
-          <div className="text-2xl font-bold font-mono text-[#16292e] dark:text-[#e7ede9]">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
             {totalCustomers}
           </div>
-          <p className="text-xs text-[#71817e] font-medium mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
             {t('customers.totalCustomers', 'Total Customers')}
           </p>
         </div>
 
         {/* Card 2: Active Buyers */}
-        <div className="p-4 rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel">
-          <div className="flex items-center justify-between mb-2">
-            <div className="size-8.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <UserCheck className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel transition-all hover:shadow-md">
+          <div className="flex items-center justify-between mb-3">
+            <div className="size-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+              <UserCheck className="size-5" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
-              {t('common.active', 'ACTIVE')}
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
+              {t('customers.active', 'ACTIVE')}
             </span>
           </div>
-          <div className="text-2xl font-bold font-mono text-[#16292e] dark:text-[#e7ede9]">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
             {activeBuyers}
           </div>
-          <p className="text-xs text-[#71817e] font-medium mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
             {t('customers.activeBuyers', 'Active Buyers')}
           </p>
         </div>
 
         {/* Card 3: Total Revenue */}
-        <div className="p-4 rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel">
-          <div className="flex items-center justify-between mb-2">
-            <div className="size-8.5 rounded-lg bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <DollarSign className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel transition-all hover:shadow-md">
+          <div className="flex items-center justify-between mb-3">
+            <div className="size-10 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20">
+              <DollarSign className="size-5" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200/60 dark:border-sky-800/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-800/60">
               {t('customers.revenue', 'REVENUE')}
             </span>
           </div>
-          <div className="text-2xl font-bold font-mono text-[#16292e] dark:text-[#e7ede9]">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
             {GlobalFormat.currency(totalRevenue)}
           </div>
-          <p className="text-xs text-[#71817e] font-medium mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
             {t('customers.totalRevenue', 'Total Revenue')}
           </p>
         </div>
       </div>
 
       {/* SmartHR Employee Table Filter Bar */}
-      <div className="flex flex-wrap items-center gap-2.5 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
+      <div className="flex flex-wrap items-center gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
         {/* Search Input */}
         <div className="relative w-full sm:w-64 md:w-72">
-          <Search className="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('common.search', 'Search name, phone, telegram...')}
-            className="h-9 w-full pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+            placeholder={t('customers.searchPlaceholder', 'Search name, phone, telegram...')}
+            className="h-10 sm:h-10.5 w-full pl-10 pr-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
           />
         </div>
 
@@ -335,13 +335,13 @@ export default function CustomersPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+            className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
           >
             <option value="all">{t('customers.allCustomers', 'All Customers')}</option>
             <option value="has_orders">{t('customers.hasOrders', 'Has Placed Orders')}</option>
             <option value="no_orders">{t('customers.noOrders', 'No Orders Yet')}</option>
           </select>
-          <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* Apply Button */}
@@ -354,10 +354,10 @@ export default function CustomersPage() {
           style={{
             backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
           }}
-          className="h-9 px-3.5 rounded-lg hover:brightness-90 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold inline-flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
         >
-          <Check className="size-3.5 stroke-[2.5]" />
-          <span>{t('buttons.apply', t('common.apply', 'Apply'))}</span>
+          <Check className="size-4 stroke-[2.5]" />
+          <span>{t('customers.apply', t('common.apply', 'Apply'))}</span>
         </button>
 
         {/* Reset Button */}
@@ -368,9 +368,9 @@ export default function CustomersPage() {
             setFilterType('all');
             setCurrentPage(1);
           }}
-          className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
         >
-          {t('buttons.reset', t('common.reset', 'Reset'))}
+          {t('customers.reset', t('common.reset', 'Reset'))}
         </button>
 
         {/* Column Visibility (Placed at the very far right) */}

@@ -234,9 +234,9 @@ export const SalesReportTable: React.FC<SalesReportTableProps> = ({
                       size="sm"
                       variant="ghost"
                       onClick={() => onSelectDate(item.date)}
-                      className="h-7 px-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 flex items-center gap-1 mx-auto cursor-pointer rounded-lg"
+                      className="h-9 px-3 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 flex items-center gap-1.5 mx-auto cursor-pointer rounded-xl"
                     >
-                      <Eye className="size-3.5" />
+                      <Eye className="size-4" />
                       <span>{t('reports.view', 'View')}</span>
                     </Button>
                   </TableCell>

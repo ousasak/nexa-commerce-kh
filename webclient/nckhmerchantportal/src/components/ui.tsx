@@ -48,12 +48,12 @@ export function Loading(props?: LoadingSpinnerProps) {
 export { Empty };
 
 export const inputCls =
-  'w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-[var(--primary-hex,#ec4899)]/20 focus:border-[var(--primary-hex,#ec4899)] transition-all outline-none';
+  'w-full h-10 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-[var(--primary-hex,#ec4899)]/20 focus:border-[var(--primary-hex,#ec4899)] transition-all outline-none';
 export const btnPrimary =
-  'bg-[var(--btn-primary-hex,var(--primary-hex,#ec4899))] hover:brightness-90 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5 active:translate-y-px';
+  'bg-[var(--btn-primary-hex,var(--primary-hex,#ec4899))] hover:brightness-90 text-white min-h-[40px] px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-2 active:scale-95';
 export const btnDanger =
-  'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5 active:translate-y-px';
+  'bg-red-600 hover:bg-red-700 text-white min-h-[40px] px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-2 active:scale-95';
 export const btnGhost =
-  'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-2xs cursor-pointer inline-flex items-center justify-center gap-1.5 active:translate-y-px';
+  'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 min-h-[40px] px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-2xs cursor-pointer inline-flex items-center justify-center gap-2 active:scale-95';
 export const btnSuccess =
-  'bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5 active:translate-y-px';
+  'bg-emerald-600 hover:bg-emerald-700 text-white min-h-[40px] px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-2 active:scale-95';

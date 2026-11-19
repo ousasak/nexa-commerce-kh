@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import toast from '../../utils/toast';
 import {
   Calendar,
@@ -39,6 +39,8 @@ import { StockHealthTable } from './StockHealthTable';
 import { CustomerReportTable } from './CustomerReportTable';
 import { OrderDrillDownModal } from './OrderDrillDownModal';
 import { TelegramReportModal } from './TelegramReportModal';
+import { ReportPrintDocument } from './ReportPrintDocument';
+import { printReportHtml } from '../../utils/printReport';
 import { telegramService } from '../../services/telegramService';
 import { Pagination } from '@/components/common/Pagination';
 
@@ -51,6 +53,10 @@ export default function ReportsPage() {
   // Filters & State
   const [period, setPeriod] = useState<PeriodType>('daily');
   const [days, setDays] = useState<number>(30);
+  const [comparison, setComparison] = useState('last_month');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedChannel, setSelectedChannel] = useState('all');
+  const [selectedPayment, setSelectedPayment] = useState('all');
   const [activeTab, setActiveTab] = usePageTab<ReportTabType>({
     paramKey: 'tab',
     defaultTab: 'sales',
@@ -87,6 +93,10 @@ export default function ReportsPage() {
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [serverTelegramSummary, setServerTelegramSummary] = useState<{ plain_text: string; html: string } | null>(null);
 
+  // Print Staging State
+  const printRenderRef = useRef<HTMLDivElement>(null);
+  const [printingReport, setPrintingReport] = useState(false);
+
   // Load backend-calculated Telegram summary for accurate EOD preview
   useEffect(() => {
     if (!user?.shop_id) return;
@@ -101,14 +111,25 @@ export default function ReportsPage() {
   }, [user?.shop_id, days, language]);
 
   // Fetch all reports
-  const loadReports = async (isSilent = false) => {
+  const loadReports = async (
+    isSilent = false,
+    overrideFilters?: { days?: number; period?: PeriodType; channel?: string; payment?: string }
+  ) => {
     if (!user?.shop_id) return;
     if (isSilent) setRefreshing(true);
     else setLoading(true);
 
+    const targetDays = overrideFilters?.days ?? days;
+    const targetPeriod = overrideFilters?.period ?? period;
+    const targetChannel = overrideFilters?.channel ?? selectedChannel;
+    const targetPayment = overrideFilters?.payment ?? selectedPayment;
+
     try {
       const [salesRes, prodRes, custRes, stockRes, ordersRes] = await Promise.all([
-        reportService.getSalesReport(user.shop_id, period, days),
+        reportService.getSalesReport(user.shop_id, targetPeriod, targetDays, {
+          channel: targetChannel,
+          payment: targetPayment,
+        }),
         reportService.getProductReport(user.shop_id),
         reportService.getCustomerReport(user.shop_id),
         stockService.getStockReport(user.shop_id).catch(() => null),
@@ -128,6 +149,33 @@ export default function ReportsPage() {
     }
   };
 
+  const handleResetFilters = () => {
+    setDays(30);
+    setPeriod('daily');
+    setComparison('last_month');
+    setSelectedCategory('all');
+    setSelectedChannel('all');
+    setSelectedPayment('all');
+    setSearch('');
+    setActivePage(1);
+    loadReports(true, {
+      days: 30,
+      period: 'daily',
+      channel: 'all',
+      payment: 'all',
+    });
+  };
+
+  const handleApplyFilters = () => {
+    loadReports(true, {
+      days,
+      period,
+      channel: selectedChannel,
+      payment: selectedPayment,
+    });
+    setActivePage(1);
+  };
+
   useEffect(() => {
     loadReports();
   }, [user?.shop_id, period, days]);
@@ -135,14 +183,6 @@ export default function ReportsPage() {
   useEffect(() => {
     setActivePage(1);
   }, [search, activeTab, pageSize]);
-
-  // Derived Business Metrics
-  const totalRevenue = Number(sales?.totals?.revenue || 0);
-  const totalOrders = Number(sales?.totals?.orders || 0);
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-  const estimatedCost = totalRevenue * 0.58;
-  const estimatedGrossProfit = Math.max(0, totalRevenue - estimatedCost);
-  const profitMarginPercent = totalRevenue > 0 ? (estimatedGrossProfit / totalRevenue) * 100 : 0;
 
   // Flatten stock items
   const stockItems: StockProductRow[] = useMemo(() => {
@@ -175,13 +215,86 @@ export default function ReportsPage() {
     return items;
   }, [stockReport]);
 
+  // Filtered Orders according to Selected Channel, Payment, and Category Controls
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      // 1. Channel Filter
+      if (selectedChannel !== 'all') {
+        const num = (o.order_number || '').toUpperCase();
+        const ch = (o.channel || (o as any).source || '').toLowerCase();
+        const isPos = num.startsWith('POS') || ch.includes('pos');
+        const isTelegram = Boolean(
+          o.customer_telegram ||
+          (o.customer_note || '').toLowerCase().includes('telegram') ||
+          ch.includes('telegram')
+        );
+        if (selectedChannel === 'pos' && !isPos) return false;
+        if (selectedChannel === 'telegram' && !isTelegram) return false;
+        if (selectedChannel === 'storefront' && (isPos || isTelegram)) return false;
+        if (selectedChannel === 'delivery' && !ch.includes('delivery')) return false;
+      }
+
+      // 2. Payment Filter
+      if (selectedPayment !== 'all') {
+        const pm = (o.payment_method || '').toLowerCase();
+        if (selectedPayment === 'khqr' && !(pm.includes('khqr') || pm.includes('bakong') || pm.includes('qr'))) return false;
+        if (selectedPayment === 'cash' && !(pm.includes('cash') || pm.includes('cod'))) return false;
+        if ((selectedPayment === 'card' || selectedPayment === 'aba') && !(pm.includes('aba') || pm.includes('card') || pm.includes('credit'))) return false;
+      }
+
+      // 3. Category Filter
+      if (selectedCategory !== 'all') {
+        const items = o.items || [];
+        if (items.length > 0) {
+          const matchCat = items.some((it: any) => {
+            const name = (it.name || '').toLowerCase();
+            const cat = (it.category_name || it.category || '').toLowerCase();
+            if (selectedCategory === 'food') return name.includes('rice') || name.includes('noodle') || name.includes('soup') || name.includes('curry') || cat.includes('food') || cat.includes('beverage') || name.includes('shake');
+            if (selectedCategory === 'bakery') return name.includes('bread') || name.includes('cake') || name.includes('dessert') || cat.includes('bakery') || cat.includes('dessert');
+            if (selectedCategory === 'groceries') return cat.includes('grocer') || name.includes('sauce') || name.includes('oil');
+            if (selectedCategory === 'retail') return cat.includes('retail') || cat.includes('goods');
+            return true;
+          });
+          if (!matchCat) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [orders, selectedChannel, selectedPayment, selectedCategory]);
+
+  const hasActiveFilters = selectedCategory !== 'all' || selectedChannel !== 'all' || selectedPayment !== 'all';
+
+  // Derived Business Metrics (Reactive to selected filters)
+  const totalRevenue = useMemo(() => {
+    if (hasActiveFilters && filteredOrders.length > 0) {
+      return filteredOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+    }
+    if (hasActiveFilters && filteredOrders.length === 0) {
+      return 0;
+    }
+    return Number(sales?.totals?.revenue || 0);
+  }, [hasActiveFilters, filteredOrders, sales?.totals?.revenue]);
+
+  const totalOrders = useMemo(() => {
+    if (hasActiveFilters) {
+      return filteredOrders.length;
+    }
+    return Number(sales?.totals?.orders || 0);
+  }, [hasActiveFilters, filteredOrders, sales?.totals?.orders]);
+
+  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const estimatedCost = totalRevenue * 0.58;
+  const estimatedGrossProfit = Math.max(0, totalRevenue - estimatedCost);
+  const profitMarginPercent = totalRevenue > 0 ? (estimatedGrossProfit / totalRevenue) * 100 : 0;
+
   // Payment Breakdown
   const paymentBreakdown = useMemo(() => {
     let khqrCount = 0;
     let cashCount = 0;
     let otherCount = 0;
 
-    orders.forEach((o) => {
+    filteredOrders.forEach((o) => {
       const method = (o.payment_method || '').toLowerCase();
       if (method.includes('khqr') || method.includes('bakong') || method.includes('aba') || method.includes('qr')) {
         khqrCount++;
@@ -200,23 +313,50 @@ export default function ReportsPage() {
       khqrPct: Math.round((khqrCount / total) * 100),
       cashPct: Math.round((cashCount / total) * 100),
     };
-  }, [orders]);
+  }, [filteredOrders]);
 
   // Operational Red Flags: Cancelled / Voided Orders
   const cancelledOrders = useMemo(() => {
-    return orders.filter((o) => {
+    return filteredOrders.filter((o) => {
       const st = (o.status || '').toLowerCase();
       return st === 'cancelled' || st === 'voided' || st === 'refunded' || st === 'failed';
     });
-  }, [orders]);
+  }, [filteredOrders]);
 
   const cancelledTotal = useMemo(() => {
     return cancelledOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
   }, [cancelledOrders]);
 
+  // Live KPI Rates
+  const fulfillmentRate = totalOrders > 0
+    ? Math.round(Math.max(0, ((totalOrders - cancelledOrders.length) / totalOrders) * 100) * 10) / 10
+    : 100;
+  const totalStockCount = stockReport?.counts?.total || stockReport?.total_products || stockItems.length || 1;
+  const outStockCount = stockReport?.counts?.out_of_stock || stockItems.filter((s) => s.status === 'out_of_stock').length || 0;
+  const stockUtilization = Math.round(Math.max(0, ((totalStockCount - outStockCount) / totalStockCount) * 100));
+  const returnRefundRate = totalOrders > 0
+    ? Math.round(((cancelledOrders.length / totalOrders) * 100) * 10) / 10
+    : 0;
 
   // Filtered & Sorted Datasets
-  const salesData: SalesRow[] = sales?.data || [];
+  const salesData: SalesRow[] = useMemo(() => {
+    if (!hasActiveFilters && sales?.data?.length) {
+      return sales.data;
+    }
+    if (hasActiveFilters) {
+      const map = new Map<string, { date: string; orders: number; revenue: number }>();
+      filteredOrders.forEach((o) => {
+        const d = (o.created_at || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+        const curr = map.get(d) || { date: d, orders: 0, revenue: 0 };
+        curr.orders += 1;
+        curr.revenue += Number(o.total || 0);
+        map.set(d, curr);
+      });
+      const list = Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
+      return list;
+    }
+    return sales?.data || [];
+  }, [hasActiveFilters, sales?.data, filteredOrders]);
 
   // Dynamic Growth Rate vs Previous Period
   const { revenueGrowth, orderGrowth } = useMemo(() => {
@@ -254,7 +394,17 @@ export default function ReportsPage() {
   const filteredProducts = useMemo(() => {
     let list = products.filter((r) => {
       const q = search.trim().toLowerCase();
-      return !q || (r.name || '').toLowerCase().includes(q);
+      const matchSearch = !q || (r.name || '').toLowerCase().includes(q);
+      if (!matchSearch) return false;
+      if (selectedCategory !== 'all') {
+        const cat = (r.category_name || (r as any).category || r.name || '').toLowerCase();
+        const target = selectedCategory.toLowerCase();
+        if (target === 'food' && !cat.includes('food') && !cat.includes('beverage') && !cat.includes('ម្ហូប') && !cat.includes('ភេសជ្ជៈ') && !cat.includes('rice') && !cat.includes('noodle') && !cat.includes('chicken') && !cat.includes('beef')) return false;
+        if (target === 'bakery' && !cat.includes('bakery') && !cat.includes('dessert') && !cat.includes('បង្អែម') && !cat.includes('នំ') && !cat.includes('cake') && !cat.includes('bread')) return false;
+        if (target === 'groceries' && !cat.includes('grocer') && !cat.includes('ទំនិញ') && !cat.includes('oil') && !cat.includes('sauce')) return false;
+        if (target === 'retail' && !cat.includes('retail') && !cat.includes('goods') && !cat.includes('ទូទៅ')) return false;
+      }
+      return true;
     });
 
     list.sort((a, b) => {
@@ -264,7 +414,7 @@ export default function ReportsPage() {
     });
 
     return list;
-  }, [products, search, sortField, sortAsc]);
+  }, [products, search, sortField, sortAsc, selectedCategory]);
 
   const filteredStock = useMemo(() => {
     let list = stockItems.filter((r) => {
@@ -407,8 +557,8 @@ ${topCustHtmlLines}
           message: effectiveHtml,
         });
       });
-      if (res?.ok) {
-        toast.success(t('reports.sentSuccess', 'Report successfully sent to shop Telegram Bot!'));
+      if (res?.ok === true || res?.success === true || res?.data?.success === true || res?.status === 200) {
+        toast.success(res?.detail || t('reports.sentSuccess', 'Report successfully sent to shop Telegram Bot!'));
       } else {
         setShowTelegramModal(true);
       }
@@ -418,12 +568,47 @@ ${topCustHtmlLines}
   };
 
   const handleShareTelegramLink = () => {
+    const decodeEntities = (str: string) => {
+      if (!str) return '';
+      return str
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&#39;/g, "'");
+    };
+
+    const cleanFullReport = decodeEntities(effectivePlainText);
+
+    // 1. Copy the full detailed report into the clipboard
     if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(effectivePlainText);
-      toast.success(t('reports.reportCopiedOpeningTg', 'Report copied! Opening Telegram...'));
+      navigator.clipboard.writeText(cleanFullReport);
+      toast.success(
+        t(
+          'reports.fullReportCopiedNotice',
+          'បានចម្លងរបាយការណ៍លម្អិតពេញលេញ! លោកអ្នកអាចចុចបិទភ្ជាប់ (Paste) ក្នុង Telegram បានភ្លាមៗ។'
+        )
+      );
     }
-    const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(effectivePlainText)}`;
-    window.open(telegramUrl, '_blank');
+
+    // 2. Format concise summary to ensure the t.me URL length stays well under Nginx / browser GET limits (< 400 bytes)
+    // preventing the Nginx "400 Bad Request" error
+    const shopName = decodeEntities((user as any)?.shop_name || (user as any)?.shop?.name || user?.username || 'Nexa Commerce');
+    const dateFormatted = new Date().toLocaleDateString(language === 'kh' ? 'km-KH' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    const revTotal = (totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+    const safeShortText =
+      language === 'kh'
+        ? `📊 ${shopName} - របាយការណ៍អាជីវកម្ម\n📅 កាលបរិច្ឆេទ: ${dateFormatted}\n💰 ចំណូលសរុប: $${revTotal} (${totalOrders} ការបញ្ជាទិញ)\n📋 (បានចម្លងរបាយការណ៍លម្អិតក្នុង Clipboard - សូមចុច Paste ក្នុង Telegram)`
+        : `📊 ${shopName} - Business Report\n📅 Date: ${dateFormatted}\n💰 Total Revenue: $${revTotal} (${totalOrders} orders)\n📋 (Full report copied to clipboard - press Paste in Telegram)`;
+
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin)}&text=${encodeURIComponent(safeShortText)}`;
+    window.open(telegramUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Active dataset for pagination
@@ -503,7 +688,26 @@ ${topCustHtmlLines}
   };
 
   const handlePrint = () => {
-    window.print();
+    const renderNode = printRenderRef.current;
+    if (!renderNode) {
+      window.print();
+      return;
+    }
+
+    const html = renderNode.innerHTML;
+    if (!html || html.trim().length === 0) {
+      requestAnimationFrame(() => handlePrint());
+      return;
+    }
+
+    setPrintingReport(true);
+    const shopTitle = (user as any)?.shop_name || (user as any)?.shop?.name || user?.username || 'Nexa_Commerce';
+    printReportHtml(html, {
+      title: `${shopTitle}_Report_${period}_${new Date().toISOString().slice(0, 10)}`,
+      onAfterPrint: () => {
+        setPrintingReport(false);
+      },
+    });
   };
 
   const handleSort = (field: any) => {
@@ -550,6 +754,17 @@ ${topCustHtmlLines}
         onExportCsv={handleExportCsv}
         onPrint={handlePrint}
         onOpenTelegramModal={() => setShowTelegramModal(true)}
+        recordCount={activeList.length}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedChannel={selectedChannel}
+        setSelectedChannel={setSelectedChannel}
+        selectedPayment={selectedPayment}
+        setSelectedPayment={setSelectedPayment}
+        comparison={comparison}
+        setComparison={setComparison}
+        onApplyFilters={handleApplyFilters}
+        onResetFilters={handleResetFilters}
       />
 
       {/* 2. Operational Action Center (Lost Sales & Void Alerts) */}
@@ -577,6 +792,9 @@ ${topCustHtmlLines}
         days={days}
         growthRate={revenueGrowth}
         orderGrowthRate={orderGrowth}
+        fulfillmentRate={fulfillmentRate}
+        stockUtilization={stockUtilization}
+        returnRefundRate={returnRefundRate}
       />
 
       {/* 4. Visual Charts (Trend, Peak Hours, Payment & Category Breakdown) */}
@@ -587,9 +805,9 @@ ${topCustHtmlLines}
         totalRevenue={totalRevenue}
         salesData={salesData}
         paymentBreakdown={paymentBreakdown}
-        totalOrdersCount={orders.length}
-        orders={orders}
-        products={products}
+        totalOrdersCount={filteredOrders.length || orders.length}
+        orders={filteredOrders}
+        products={filteredProducts}
       />
 
       {/* 4. Tabs & Detailed Tables */}
@@ -627,7 +845,7 @@ ${topCustHtmlLines}
           {/* Search & Page Size */}
           <div className="flex items-center gap-2">
             <div className="relative w-48 sm:w-64">
-              <Search className="size-3.5 text-[#71817e] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="size-4 text-[#71817e] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
                 type="text"
                 value={search}
@@ -641,7 +859,7 @@ ${topCustHtmlLines}
                     ? t('reports.searchStock', 'Search stock / SKU...')
                     : t('reports.searchCustomer', 'Search customer / phone...')
                 }
-                className="h-8 pl-8 pr-3 text-xs rounded-xl bg-white dark:bg-[#142629] border-[#dfe7df] dark:border-[#2a4245] text-[#16292e] dark:text-[#e7ede9]"
+                className="h-10 pl-9 pr-3 text-sm rounded-xl bg-white dark:bg-[#142629] border-[#dfe7df] dark:border-[#2a4245] text-[#16292e] dark:text-[#e7ede9]"
               />
             </div>
 
@@ -652,13 +870,13 @@ ${topCustHtmlLines}
                   setPageSize(Number(e.target.value));
                   setActivePage(1);
                 }}
-                className="h-8 pl-2.5 pr-7 rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] text-xs font-medium text-[#16292e] dark:text-[#e7ede9] appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ea580c]/30"
+                className="h-10 pl-3 pr-8 rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] text-sm font-semibold text-[#16292e] dark:text-[#e7ede9] appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ea580c]/30"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
               </select>
-              <ChevronDown className="size-3 text-[#71817e] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="size-3.5 text-[#71817e] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -758,6 +976,98 @@ ${topCustHtmlLines}
         reportPlainText={effectivePlainText}
         onShareLinkFallback={handleShareTelegramLink}
       />
+
+      {/* 7. Hidden Print Staging Stage */}
+      <div
+        ref={printRenderRef}
+        style={{
+          position: 'fixed',
+          top: '-99999px',
+          left: '-99999px',
+          width: '210mm',
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: -9999,
+        }}
+        aria-hidden="true"
+      >
+        <ReportPrintDocument
+          language={language}
+          shopName={(user as any)?.shop_name || (user as any)?.shop?.name || user?.username || t('reports.myShop', 'My Shop')}
+          shopLogo={(user as any)?.shop?.logo || (user as any)?.logo}
+          shopPhone={(user as any)?.shop?.contact || (user as any)?.shop?.phone}
+          shopAddress={(user as any)?.shop?.address}
+          userName={user?.username || 'Store Owner'}
+          periodLabel={
+            days === 1
+              ? t('reports.today24h', 'Today (24h)')
+              : days === 7
+              ? t('reports.pastDaysDropdown', { count: 7, defaultValue: 'Past 7 Days' })
+              : t('reports.pastDaysDropdown', { count: days, defaultValue: `Past ${days} Days` })
+          }
+          dateRangeStr={
+            days === 1
+              ? new Date().toLocaleDateString(language === 'kh' ? 'km-KH' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+              : `${new Date(Date.now() - (days - 1) * 86400000).toLocaleDateString(language === 'kh' ? 'km-KH' : 'en-US', { month: 'short', day: 'numeric' })} - ${new Date().toLocaleDateString(language === 'kh' ? 'km-KH' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
+          }
+          printedAtStr={new Date().toLocaleString(language === 'kh' ? 'km-KH' : 'en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+          channelFilterLabel={
+            selectedChannel === 'all'
+              ? t('reports.allChannels', 'All Channels')
+              : selectedChannel === 'pos'
+              ? t('reports.posInStore', 'POS In-Store')
+              : selectedChannel === 'telegram'
+              ? t('reports.telegramOrder', 'Telegram Order')
+              : t('reports.onlineStorefront', 'Online Storefront')
+          }
+          paymentFilterLabel={
+            selectedPayment === 'all'
+              ? t('reports.allPaymentTypes', 'All Payment Types')
+              : selectedPayment === 'khqr'
+              ? t('reports.khqrBakong', 'KHQR / Bakong')
+              : selectedPayment === 'cash'
+              ? t('reports.cashOnHand', 'Cash on Hand')
+              : t('reports.creditCardAba', 'Credit Card / ABA')
+          }
+          categoryFilterLabel={
+            selectedCategory === 'all'
+              ? t('reports.allCategories', 'All Categories')
+              : selectedCategory === 'food'
+              ? t('reports.foodBeverages', 'Food & Beverages')
+              : selectedCategory === 'bakery'
+              ? t('reports.bakeryDesserts', 'Bakery & Desserts')
+              : selectedCategory === 'groceries'
+              ? t('reports.groceries', 'Groceries')
+              : t('reports.retailGoods', 'Retail & Goods')
+          }
+          totalRevenue={totalRevenue}
+          totalOrders={totalOrders}
+          avgOrderValue={avgOrderValue}
+          estimatedGrossProfit={estimatedGrossProfit}
+          profitMarginPercent={profitMarginPercent}
+          fulfillmentRate={fulfillmentRate}
+          stockUtilization={stockUtilization}
+          returnRefundRate={returnRefundRate}
+          revenueGrowth={revenueGrowth}
+          paymentBreakdown={paymentBreakdown}
+          topProducts={products}
+          salesRows={salesData}
+          stockSummary={{
+            total: stockReport?.counts?.total || stockReport?.total_products || stockItems.length || 0,
+            healthy: stockItems.filter((s) => s.status === 'normal_stock' || s.status === 'high_stock').length || Math.max(0, (stockReport?.counts?.total || 0) - (stockReport?.counts?.low_stock || 0) - (stockReport?.counts?.out_of_stock || 0)),
+            lowStock: stockReport?.counts?.low_stock || stockItems.filter((s) => s.status === 'low_stock').length || 0,
+            outOfStock: stockReport?.counts?.out_of_stock || stockItems.filter((s) => s.status === 'out_of_stock').length || 0,
+          }}
+          cancelledCount={cancelledOrders.length}
+          cancelledTotal={cancelledTotal}
+        />
+      </div>
     </div>
   );
 }

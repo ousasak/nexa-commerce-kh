@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\V1\Backup\BackupController;
 use App\Http\Controllers\Api\V1\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Orders\OrderController;
@@ -9,6 +10,9 @@ use App\Http\Controllers\Api\V1\Plans\PlanController;
 use App\Http\Controllers\Api\V1\Products\CategoryController;
 use App\Http\Controllers\Api\V1\Products\ProductController;
 use App\Http\Controllers\Api\V1\Reports\ReportController;
+use App\Http\Controllers\Api\V1\Restaurant\KitchenOrderController;
+use App\Http\Controllers\Api\V1\Restaurant\ReservationController;
+use App\Http\Controllers\Api\V1\Restaurant\TableController;
 use App\Http\Controllers\Api\V1\Settings\SettingController;
 use App\Http\Controllers\Api\V1\Shop\ShopController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramController;
@@ -25,6 +29,13 @@ $registerApiRoutes = function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/login/oauth2', [AuthController::class, 'loginOauth2']);
+
+        // Google Merchant Login with Gmail OTP Verification Alert
+        Route::prefix('google')->group(function () {
+            Route::post('/verify-identity', [GoogleAuthController::class, 'verifyIdentity']);
+            Route::post('/verify-otp', [GoogleAuthController::class, 'verifyOtp']);
+            Route::post('/resend-otp', [GoogleAuthController::class, 'resendOtp']);
+        });
 
         // Customer Telegram login
         Route::post('/telegram/login', [AuthController::class, 'telegramLogin']);
@@ -212,6 +223,34 @@ $registerApiRoutes = function () {
         Route::get('/activity', [TelegramController::class, 'listActivity']);
     });
 
+    // ==================== RESTAURANT: TABLES ====================
+    Route::prefix('tables')->middleware('jwt.auth')->group(function () {
+        Route::get('', [TableController::class, 'index']);
+        Route::post('', [TableController::class, 'store']);
+        Route::post('/reset', [TableController::class, 'reset']);
+        Route::get('/{id}', [TableController::class, 'show']);
+        Route::put('/{id}', [TableController::class, 'update']);
+        Route::patch('/{id}/status', [TableController::class, 'updateStatus']);
+        Route::delete('/{id}', [TableController::class, 'destroy']);
+    });
+
+    // ==================== RESTAURANT: RESERVATIONS ====================
+    Route::prefix('reservations')->middleware('jwt.auth')->group(function () {
+        Route::get('', [ReservationController::class, 'index']);
+        Route::post('', [ReservationController::class, 'store']);
+        Route::get('/{id}', [ReservationController::class, 'show']);
+        Route::put('/{id}', [ReservationController::class, 'update']);
+        Route::patch('/{id}/status', [ReservationController::class, 'updateStatus']);
+        Route::delete('/{id}', [ReservationController::class, 'destroy']);
+    });
+
+    // ==================== RESTAURANT: KITCHEN DISPLAY ====================
+    Route::prefix('kitchen-orders')->middleware('jwt.auth')->group(function () {
+        Route::get('', [KitchenOrderController::class, 'index']);
+        Route::post('', [KitchenOrderController::class, 'store']);
+        Route::patch('/{id}/status', [KitchenOrderController::class, 'updateStatus']);
+    });
+
     // ==================== UPLOADS ====================
     Route::prefix('uploads')->middleware('jwt.auth')->group(function () {
         Route::post('', [UploadController::class, 'upload']);
@@ -231,7 +270,17 @@ $registerApiRoutes = function () {
             Route::get('/profile/{shop_id}', [TelegramController::class, 'profile']);
             Route::post('/link-chat', [TelegramController::class, 'linkChat']);
             Route::post('/unlink-chat', [TelegramController::class, 'unlinkChat']);
+            Route::post('/linking-token', [TelegramController::class, 'generateLinkingToken']);
+            Route::post('/disconnect', [TelegramController::class, 'disconnect']);
+            Route::put('/preferences', [TelegramController::class, 'updatePreferences']);
         });
+    });
+
+    // ==================== BOT SERVICE ====================
+    Route::prefix('bot-service')->group(function () {
+        Route::post('/link', [TelegramController::class, 'botServiceLink']);
+        Route::get('/report', [TelegramController::class, 'botServiceReport']);
+        Route::get('/config', [TelegramController::class, 'botServiceConfig']);
     });
 
     // ==================== ACTIVITY ====================

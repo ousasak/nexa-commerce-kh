@@ -155,13 +155,24 @@ export const ThemeSynchronizer: React.FC = () => {
     root.style.setProperty('--sidebar-radius', getRadiusVal(customizer.sidebar.roundedStyle));
 
     // 6. Navbar Styles
+    let effectiveNavBg = customizer.navbar.bgColor || (isDark ? '#0f172a' : '#ffffff');
+    let effectiveNavText = customizer.navbar.textColor || (isDark ? '#f8fafc' : '#0f172a');
+    let effectiveNavBorder = customizer.navbar.borderColor || (isDark ? '#1e293b' : '#e2e8f0');
+
+    // In light mode, if navbar still has stale dark defaults, auto-normalize to crisp white
+    if (!isDark && effectiveNavBg.toLowerCase() === '#0f172a' && effectiveNavText.toLowerCase() === '#f8fafc') {
+      effectiveNavBg = '#ffffff';
+      effectiveNavText = '#0f172a';
+      effectiveNavBorder = '#e2e8f0';
+    }
+
     root.style.setProperty(
       '--navbar-bg',
-      hexToRgba(customizer.navbar.bgColor, customizer.navbar.transparency)
+      hexToRgba(effectiveNavBg, customizer.navbar.transparency ?? 1)
     );
-    root.style.setProperty('--navbar-text', customizer.navbar.textColor);
-    root.style.setProperty('--navbar-border', customizer.navbar.borderColor);
-    root.style.setProperty('--navbar-height', `${customizer.navbar.height}px`);
+    root.style.setProperty('--navbar-text', effectiveNavText);
+    root.style.setProperty('--navbar-border', effectiveNavBorder);
+    root.style.setProperty('--navbar-height', `${customizer.navbar.height || 64}px`);
     root.style.setProperty('--navbar-shadow', getShadowVal(customizer.navbar.shadow, isDark));
 
     // 7. Cards

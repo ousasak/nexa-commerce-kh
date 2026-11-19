@@ -15,7 +15,6 @@ import {
   FiPackage,
   FiTag,
   FiUsers,
-  FiChevronDown,
   FiMenu,
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -57,6 +56,10 @@ export const Header: React.FC<HeaderProps> = ({
       window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const isNavbarDark = useMemo(() => {
+    // If global theme is light mode and navbar is dark default, treat as light
+    if (!isDark && navbar?.bgColor?.toLowerCase() === '#0f172a') {
+      return false;
+    }
     const bg = navbar?.bgColor;
     if (!bg) return isDark;
     const hex = bg.replace('#', '');
@@ -83,13 +86,6 @@ export const Header: React.FC<HeaderProps> = ({
   const displayEmail = user?.email || `${user?.username || 'merchant'}@ministorekh.com`;
   const roleName = user?.role === 'staff' ? 'Staff' : 'Admin';
   const initial = (user?.username || user?.full_name || 'M').charAt(0).toUpperCase();
-
-  // Extract first name for concise SmartHR-style profile pill (e.g., "Avery" in reference image)
-  const userFirstName = useMemo(() => {
-    if (!displayName) return 'User';
-    const parts = displayName.trim().split(/\s+/);
-    return parts[0] || 'User';
-  }, [displayName]);
 
   // Determine current page title and subtitle category for header matching SmartHR layout
   const pageTitle = useMemo(() => {
@@ -211,13 +207,23 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       style={{
-        backgroundColor: 'var(--navbar-bg, #ffffff)',
-        color: 'var(--navbar-text, #142628)',
-        borderColor: 'var(--navbar-border, #dfe7df)',
+        backgroundColor: isNavbarDark
+          ? 'var(--navbar-bg, #0f172a)'
+          : 'var(--navbar-bg, #ffffff)',
+        color: isNavbarDark
+          ? 'var(--navbar-text, #f8fafc)'
+          : 'var(--navbar-text, #0f172a)',
+        borderColor: isNavbarDark
+          ? 'var(--navbar-border, #1e293b)'
+          : 'var(--navbar-border, #e2e8f0)',
         boxShadow: 'var(--navbar-shadow, none)',
         height: 'var(--navbar-height, 64px)',
       }}
-      className="border-b sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between transition-colors backdrop-blur-md font-sans"
+      className={`border-b sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between transition-colors backdrop-blur-md font-sans ${
+        isNavbarDark
+          ? 'bg-slate-900 text-slate-100 border-slate-800'
+          : 'bg-white/95 text-slate-900 border-slate-200/80 shadow-xs'
+      }`}
     >
       {/* Left: Mobile Toggle (on < md) + Clean Page Title & Subtitle */}
       <div className="flex items-center gap-3 min-w-0">
@@ -227,7 +233,14 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={onToggleMobileSidebar}
             aria-label="Toggle Navigation Menu"
-            className="md:hidden size-9 rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-inherit flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            style={{
+              backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+              borderColor: isNavbarDark ? 'rgba(255, 255, 255, 0.15)' : 'var(--navbar-border, rgba(0, 0, 0, 0.08))',
+              color: isNavbarDark ? 'var(--navbar-text, #f8fafc)' : 'var(--navbar-text, #0f172a)',
+            }}
+            className={`md:hidden size-9 rounded-lg border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+              isNavbarDark ? 'hover:bg-white/20' : 'hover:bg-black/8'
+            }`}
           >
             <FiMenu className="size-5" />
           </button>
@@ -246,14 +259,28 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right: Search, Quick Add, Notifications, Theme, Language, Profile */}
       <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-        {/* Search Workspace Input (Reference: 🔍 Search workspace ⌘K) */}
+        {/* Search Workspace Input (Adapts to Active Navbar Theme) */}
         <div
           onClick={() => navigate('/products')}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#f4f6f4] dark:bg-[#152a2c] border border-[#dfe6df] dark:border-[#223d40] text-xs text-[#526663] dark:text-[#9fb0ac] hover:border-[var(--primary-hex,#ec4899)] focus-within:border-[var(--primary-hex,#ec4899)] focus-within:ring-1 focus-within:ring-[var(--primary-hex,#ec4899)] w-44 lg:w-56 xl:w-64 cursor-pointer transition-all"
+          style={{
+            backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.03)',
+            borderColor: isNavbarDark ? 'rgba(255, 255, 255, 0.15)' : 'var(--navbar-border, rgba(0, 0, 0, 0.08))',
+            color: isNavbarDark ? 'var(--navbar-text, #f8fafc)' : 'var(--navbar-text, #1e293b)',
+          }}
+          className={`hidden md:flex items-center gap-2.5 h-10 px-3.5 rounded-xl border text-sm hover:border-[var(--primary-hex,#ec4899)] focus-within:border-[var(--primary-hex,#ec4899)] focus-within:ring-1 focus-within:ring-[var(--primary-hex,#ec4899)] w-48 lg:w-60 xl:w-68 cursor-pointer transition-all ${
+            isNavbarDark ? 'hover:bg-white/12' : 'hover:bg-slate-100/80'
+          }`}
         >
-          <FiSearch className="size-3.5 text-slate-400 shrink-0" />
-          <span className="truncate">Search workspace</span>
-          <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-[#0e1b1d] border border-[#dfe6df] dark:border-[#2a4245] text-[#718783] dark:text-[#8ea39f] shadow-2xs">
+          <FiSearch className="size-4 opacity-60 shrink-0" />
+          <span className="truncate opacity-80">{t('common.searchWorkspace', 'Search workspace')}</span>
+          <kbd
+            style={{
+              backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.05)',
+              borderColor: isNavbarDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.08)',
+              color: 'inherit',
+            }}
+            className="ml-auto text-xs font-mono px-1.5 py-0.5 rounded border shadow-2xs opacity-80"
+          >
             ⌘K
           </kbd>
         </div>
@@ -266,67 +293,67 @@ export const Header: React.FC<HeaderProps> = ({
               style={{
                 backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, var(--sidebar-active-bg, #ec4899)))',
               }}
-              className="active:scale-95 text-white hover:brightness-110 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+              className="active:scale-95 text-white hover:brightness-110 h-10 px-3.5 sm:px-4 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
             >
-              <FiPlus className="size-3.5 sm:size-4 stroke-[2.5]" />
+              <FiPlus className="size-4 stroke-[2.5]" />
               <span className="hidden xs:inline">Quick Add</span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
             sideOffset={8}
-            className="w-52 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl text-xs font-medium"
+            className="w-56 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl text-sm font-medium"
           >
-            <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-2 py-1">
+            <DropdownMenuLabel className="text-xs uppercase font-bold tracking-wider text-slate-400 px-2.5 py-1.5">
               Create New Action
             </DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => navigate('/products/new')}
-              className="gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100"
+              className="gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
             >
               <FiPackage
                 style={{ color: 'var(--primary-hex, var(--sidebar-active-bg, #ec4899))' }}
-                className="size-4"
+                className="size-4.5"
               />
               <span>New Product</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate('/pos')}
-              className="gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100"
+              className="gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
             >
               <FiCreditCard
                 style={{ color: 'var(--primary-hex, var(--sidebar-active-bg, #ec4899))' }}
-                className="size-4"
+                className="size-4.5"
               />
               <span>POS Terminal Sale</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate('/orders')}
-              className="gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100"
+              className="gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
             >
               <FiShoppingBag
                 style={{ color: 'var(--primary-hex, var(--sidebar-active-bg, #ec4899))' }}
-                className="size-4"
+                className="size-4.5"
               />
               <span>Record Order</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate('/menu/category')}
-              className="gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100"
+              className="gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
             >
               <FiTag
                 style={{ color: 'var(--primary-hex, var(--sidebar-active-bg, #ec4899))' }}
-                className="size-4"
+                className="size-4.5"
               />
               <span>New Category</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate('/customers')}
-              className="gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100"
+              className="gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
             >
               <FiUsers
                 style={{ color: 'var(--primary-hex, var(--sidebar-active-bg, #ec4899))' }}
-                className="size-4"
+                className="size-4.5"
               />
               <span>New Customer</span>
             </DropdownMenuItem>
@@ -334,46 +361,53 @@ export const Header: React.FC<HeaderProps> = ({
         </DropdownMenu>
 
         {/* Notifications Dropdown with Alert Badge */}
-        <NotificationDropdown />
+        <NotificationDropdown isNavbarDark={isNavbarDark} />
 
         {/* Theme Toggle Button */}
         <button
           type="button"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className={`size-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs ${
-            isNavbarDark
-              ? 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
-              : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-foreground border border-slate-200/80 dark:border-slate-700'
+          style={{
+            backgroundColor: isNavbarDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+            borderColor: isNavbarDark ? 'rgba(255, 255, 255, 0.15)' : 'var(--navbar-border, rgba(0, 0, 0, 0.08))',
+            color: isNavbarDark ? 'var(--navbar-text, #f8fafc)' : 'var(--navbar-text, #1e293b)',
+          }}
+          className={`size-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-2xs border ${
+            isNavbarDark ? 'hover:bg-white/20' : 'hover:bg-black/8'
           }`}
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {isDark ? (
-            <FiSun className="size-4 text-amber-400 rotate-0 transition-transform duration-300 hover:rotate-45" />
+            <FiSun className="size-4.5 text-amber-400 rotate-0 transition-transform duration-300 hover:rotate-45" />
           ) : (
             <FiMoon
-              className={`size-4 rotate-0 transition-transform duration-300 hover:rotate-12 ${
-                isNavbarDark ? 'text-amber-300' : 'text-slate-700 dark:text-slate-300'
+              className={`size-4.5 rotate-0 transition-transform duration-300 hover:rotate-12 ${
+                isNavbarDark ? 'text-amber-300' : 'text-slate-700'
               }`}
             />
           )}
         </button>
 
-        {/* Compact Dropdown Language Switcher (Doesn't crowd navbar) */}
-        <LanguageSwitcher variant="dropdown" />
+        {/* Compact Dropdown Language Switcher */}
+        <LanguageSwitcher variant="dropdown" isNavbarDark={isNavbarDark} />
 
-        {/* SmartHR User Profile Pill (Avatar + First Name + Chevron) */}
+        {/* User Profile Avatar (Avatar only - text hidden per user requirement) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 sm:gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-[#162a2d] transition-all outline-none cursor-pointer text-left ml-0.5 sm:ml-1"
+              className="flex items-center p-0.5 rounded-full hover:ring-2 hover:ring-[var(--primary-hex,#ec4899)] transition-all outline-none cursor-pointer shrink-0 ml-0.5 sm:ml-1"
+              title={displayName}
             >
-              <Avatar className="size-8 ring-1 ring-slate-200 dark:ring-[#2a4245] shadow-2xs">
-                <AvatarImage src={user?.avatar_url ? fullUrl(user.avatar_url) : ''} alt={displayName} />
+              <Avatar className="size-9.5 sm:size-10 ring-1 ring-white/20 dark:ring-white/10 shadow-2xs">
+                <AvatarImage
+                  src={user?.avatar_url ? fullUrl(user.avatar_url) : (shop?.logo ? fullUrl(shop.logo) : '')}
+                  alt={displayName}
+                />
                 <AvatarFallback
                   style={{
-                    backgroundColor: 'color-mix(in srgb, var(--primary-hex, #ec4899) 18%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--primary-hex, #ec4899) 25%, transparent)',
                     color: 'var(--primary-hex, #ec4899)',
                   }}
                   className="font-bold text-xs uppercase"
@@ -381,13 +415,6 @@ export const Header: React.FC<HeaderProps> = ({
                   {initial}
                 </AvatarFallback>
               </Avatar>
-
-              <div className="hidden sm:flex items-center gap-1 min-w-0 pr-0.5">
-                <span className="text-xs font-semibold text-[#142628] dark:text-[#f0f4f2] truncate max-w-[90px]">
-                  {userFirstName}
-                </span>
-                <FiChevronDown className="size-3 text-slate-400 shrink-0" />
-              </div>
             </button>
           </DropdownMenuTrigger>
 

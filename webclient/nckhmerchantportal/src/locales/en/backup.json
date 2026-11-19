@@ -2,6 +2,9 @@
   "badge": "Data Safety & Disaster Recovery",
   "title": "Backup & Restore System",
   "subtitle": "Create full snapshots of your products, orders, categories, customers, and shop settings.",
+  "latestBackup": "Last Backup:",
+  "noBackupYet": "None yet",
+  "totalFiles": "Total {{count}} files",
   "cards": {
     "zipTitle": "Full System Backup",
     "zipBadge": "Recommended",

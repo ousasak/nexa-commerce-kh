@@ -27,6 +27,7 @@ import enReceipts from '../locales/en/receipts.json';
 import enUpgrade from '../locales/en/upgrade.json';
 import enPayment from '../locales/en/payment.json';
 import enTelegram from '../locales/en/telegram.json';
+import enStock from '../locales/en/stock.json';
 
 // Khmer bundles
 import khCommon from '../locales/kh/common.json';
@@ -54,12 +55,22 @@ import khReceipts from '../locales/kh/receipts.json';
 import khUpgrade from '../locales/kh/upgrade.json';
 import khPayment from '../locales/kh/payment.json';
 import khTelegram from '../locales/kh/telegram.json';
+import khStock from '../locales/kh/stock.json';
 
 
 export const defaultNS = 'translation';
 
 const enTranslation = {
   ...enCommon,
+  ...enProducts,
+  ...enCategories,
+  ...enCustomers,
+  ...enReports,
+  ...enReceipts,
+  ...enUpgrade,
+  ...enPayment,
+  ...enTelegram,
+  ...enStock,
   common: enCommon,
   auth: enAuth,
   nav: enNav,
@@ -78,25 +89,27 @@ const enTranslation = {
   pos: enPos,
   restaurant: enRestaurant,
   products: enProducts,
-  ...enProducts,
   categories: enCategories,
-  ...enCategories,
   customers: enCustomers,
-  ...enCustomers,
   reports: enReports,
-  ...enReports,
   receipts: enReceipts,
-  ...enReceipts,
   upgrade: enUpgrade,
-  ...enUpgrade,
   payment: enPayment,
-  ...enPayment,
   telegram: enTelegram,
-  ...enTelegram,
+  stock: enStock,
 };
 
 const khTranslation = {
   ...khCommon,
+  ...khProducts,
+  ...khCategories,
+  ...khCustomers,
+  ...khReports,
+  ...khReceipts,
+  ...khUpgrade,
+  ...khPayment,
+  ...khTelegram,
+  ...khStock,
   common: khCommon,
   auth: khAuth,
   nav: khNav,
@@ -115,21 +128,14 @@ const khTranslation = {
   pos: khPos,
   restaurant: khRestaurant,
   products: khProducts,
-  ...khProducts,
   categories: khCategories,
-  ...khCategories,
   customers: khCustomers,
-  ...khCustomers,
   reports: khReports,
-  ...khReports,
   receipts: khReceipts,
-  ...khReceipts,
   upgrade: khUpgrade,
-  ...khUpgrade,
   payment: khPayment,
-  ...khPayment,
   telegram: khTelegram,
-  ...khTelegram,
+  stock: khStock,
 };
 
 export const resources = {
@@ -160,6 +166,7 @@ export const resources = {
     upgrade: enUpgrade,
     payment: enPayment,
     telegram: enTelegram,
+    stock: enStock,
   },
   kh: {
     translation: khTranslation,
@@ -188,6 +195,7 @@ export const resources = {
     upgrade: khUpgrade,
     payment: khPayment,
     telegram: khTelegram,
+    stock: khStock,
   },
 } as const;
 
@@ -281,7 +289,7 @@ i18n
     lng: initialLang,
     fallbackLng: 'en',
     defaultNS: 'translation',
-    fallbackNS: ['common', 'auth', 'nav', 'dashboard', 'shops', 'users', 'resellers', 'backup', 'logs', 'settings', 'buttons', 'tables', 'forms', 'pagination', 'toast', 'pos', 'restaurant', 'products', 'categories', 'customers', 'reports', 'receipts', 'payment', 'telegram'],
+    fallbackNS: ['common', 'auth', 'nav', 'dashboard', 'shops', 'users', 'resellers', 'backup', 'logs', 'settings', 'buttons', 'tables', 'forms', 'pagination', 'toast', 'pos', 'restaurant', 'products', 'categories', 'customers', 'reports', 'receipts', 'payment', 'telegram', 'stock'],
     keySeparator: '.',
     interpolation: {
       escapeValue: false,

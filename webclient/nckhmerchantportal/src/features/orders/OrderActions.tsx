@@ -16,10 +16,10 @@ export const OrderRowActions: React.FC<OrderRowActionsProps> = ({ order, onView 
     <button
       type="button"
       onClick={() => onView(order)}
-      className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+      className="inline-flex size-9 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs active:scale-95"
       title={t('common.view', 'View Details')}
     >
-      <Eye className="size-4" />
+      <Eye className="size-4.5" />
     </button>
   );
 };

@@ -27,6 +27,16 @@ class Category extends Model
         ];
     }
 
+    public function setImageAttribute($value): void
+    {
+        $this->attributes['image'] = $value ?? '';
+    }
+
+    public function setSlugAttribute($value): void
+    {
+        $this->attributes['slug'] = $value ?? '';
+    }
+
     public function shop()
     {
         return $this->belongsTo(Shop::class, 'shop_id');

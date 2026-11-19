@@ -71,56 +71,56 @@ export const OrdersPage: React.FC = () => {
       <Breadcrumbs />
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
           {t('restaurant.orders', 'Orders')}
         </h1>
-        <p className="text-xs text-slate-500">
+        <p className="text-sm text-slate-500 mt-0.5">
           {t('restaurant.ordersSubtitle', 'Manage and track all restaurant orders')}
         </p>
       </div>
 
       {/* KPI Stat Cards (Matching Customers Page Clean Design) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5">
         {/* Card 1: Total Orders */}
-        <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center">
-            <ShoppingBag className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3.5">
+          <div className="size-11 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <ShoppingBag className="size-5" />
           </div>
           <div>
-            <div className="text-[11px] font-medium text-slate-500">
+            <div className="text-xs sm:text-[13px] font-semibold text-slate-500">
               {t('restaurant.totalOrders', 'Total Orders')}
             </div>
-            <div className="text-lg font-bold text-slate-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
               {totalOrders}
             </div>
           </div>
         </div>
 
         {/* Card 2: Pending / Preparing */}
-        <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <Clock className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3.5">
+          <div className="size-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Clock className="size-5" />
           </div>
           <div>
-            <div className="text-[11px] font-medium text-slate-500">
+            <div className="text-xs sm:text-[13px] font-semibold text-slate-500">
               {t('restaurant.pendingPreparing', 'Pending / Preparing')}
             </div>
-            <div className="text-lg font-bold text-slate-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
               {pendingOrders}
             </div>
           </div>
         </div>
 
         {/* Card 3: Completed / Delivered */}
-        <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <CheckCircle className="size-4" />
+        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center gap-3.5">
+          <div className="size-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <CheckCircle className="size-5" />
           </div>
           <div>
-            <div className="text-[11px] font-medium text-slate-500">
+            <div className="text-xs sm:text-[13px] font-semibold text-slate-500">
               {t('restaurant.completedOrders', 'Completed Orders')}
             </div>
-            <div className="text-lg font-bold text-slate-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
               {completedOrders}
             </div>
           </div>

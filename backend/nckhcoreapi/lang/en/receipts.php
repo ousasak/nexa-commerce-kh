@@ -62,6 +62,10 @@ return [
         'processing' => 'Processing',
         'confirmed' => 'Confirmed',
         'completed' => 'Completed',
+        'delivered' => 'Delivered',
+        'shipped' => 'Shipped',
+        'refunded' => 'Refunded',
+        'rejected' => 'Rejected',
         'cancelled' => 'Cancelled',
     ],
 ];

@@ -13,7 +13,7 @@ import {
   localizeCategoryName,
 } from './CategoryTable';
 import { CategoryModal } from './CategoryModal';
-import { CategoryHeaderActions } from './CategoryActions';
+import { CategoryHeaderActions, CategoryDeleteDialog } from './CategoryActions';
 
 const RESTRO_DEFAULT_CATEGORIES: Category[] = [
   { id: 1, name: 'Pizza', slug: 'pizza', sort_order: 1 },
@@ -57,6 +57,10 @@ export default function CategoriesPage() {
   const [formStatus, setFormStatus] = useState<'active' | 'inactive'>('active');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+
+  // Delete modal states
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load from API
   const loadCategories = () => {
@@ -162,35 +166,38 @@ export default function CategoriesPage() {
     }
   };
 
-  // Delete
-  const handleDeleteCategory = async (id: number, name: string) => {
+  // Trigger Delete Popup
+  const handleDeleteCategory = (catOrId: Category | number, name?: string) => {
     setOpenDropdownId(null);
-    const localizedName = localizeCategoryName(name, isKhmer, true);
-    if (
-      !window.confirm(
-        t(
-          'categories.confirmDelete',
-          t('restaurant.confirmDeleteCategory', `Are you sure you want to delete "${localizedName}"?`, {
-            name: localizedName,
-          }),
-          { name: localizedName }
-        )
-      )
-    )
-      return;
+    if (typeof catOrId === 'object' && catOrId !== null) {
+      setCategoryToDelete(catOrId);
+    } else {
+      const found =
+        categories.find((c) => c.id === catOrId) ||
+        ({ id: Number(catOrId), name: name || '', slug: '', sort_order: 1 } as Category);
+      setCategoryToDelete(found);
+    }
+  };
 
+  // Confirm Delete in Popup
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
+    setIsDeleting(true);
     try {
       if (user?.shop_id) {
-        await categoryService.delete(id).catch(() => {});
+        await categoryService.delete(categoryToDelete.id).catch(() => {});
       }
-      setCategories((prev) => prev.filter((c) => c.id !== id));
+      setCategories((prev) => prev.filter((c) => c.id !== categoryToDelete.id));
       toast.success(
         t('categories.categoryDeleted', t('restaurant.categoryDeleted', 'Category deleted'))
       );
+      setCategoryToDelete(null);
     } catch {
       toast.error(
         t('categories.categoryDeleteFailed', t('restaurant.categoryDeleteFailed', 'Failed to delete category'))
       );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -251,10 +258,10 @@ export default function CategoriesPage() {
       </div>
 
       {/* SmartHR Employee Table Filter Bar */}
-      <div className="flex flex-wrap items-center gap-2.5 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
+      <div className="flex flex-wrap items-center gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
         {/* Search Input */}
         <div className="relative w-full sm:w-64 md:w-72">
-          <Search className="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="search"
             value={search}
@@ -266,7 +273,7 @@ export default function CategoriesPage() {
               'categories.searchCategories',
               t('restaurant.searchCategories', 'Search categories...')
             )}
-            className="h-9 w-full pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+            className="h-10 sm:h-10.5 w-full pl-10 pr-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
           />
         </div>
 
@@ -278,7 +285,7 @@ export default function CategoriesPage() {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+            className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
           >
             <option value="all">
               {t('categories.allStatuses', t('common.allStatuses', 'All Status'))}
@@ -290,7 +297,7 @@ export default function CategoriesPage() {
               {t('categories.inactive', t('common.inactive', 'Inactive'))}
             </option>
           </select>
-          <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* Apply Button */}
@@ -303,9 +310,9 @@ export default function CategoriesPage() {
           style={{
             backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
           }}
-          className="h-9 px-3.5 rounded-lg hover:brightness-90 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold inline-flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
         >
-          <Check className="size-3.5 stroke-[2.5]" />
+          <Check className="size-4 stroke-[2.5]" />
           <span>{t('buttons.apply', t('common.apply', 'Apply'))}</span>
         </button>
 
@@ -317,7 +324,7 @@ export default function CategoriesPage() {
             setStatusFilter('all');
             setCurrentPage(1);
           }}
-          className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
         >
           {t('buttons.reset', t('common.reset', 'Reset'))}
         </button>
@@ -381,6 +388,14 @@ export default function CategoriesPage() {
         setFormDesc={setFormDesc}
         setFormSortOrder={setFormSortOrder}
         setFormStatus={setFormStatus}
+      />
+
+      {/* Category Delete Popup Dialog */}
+      <CategoryDeleteDialog
+        category={categoryToDelete}
+        isDeleting={isDeleting}
+        onClose={() => setCategoryToDelete(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

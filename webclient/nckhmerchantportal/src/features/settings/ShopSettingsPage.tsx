@@ -32,6 +32,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Image as ImageIcon,
+  Volume2,
 } from 'lucide-react';
 import { changePassword, getShopDetail, updateShop, uploadImage, fullUrl } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -115,6 +116,41 @@ export default function ShopSettings() {
   const [initialShopState, setInitialShopState] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [kdsSoundEnabled, setKdsSoundEnabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('restro_kds_sound_v1') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const playTestChime = () => {
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      const playTone = (freq: number, start: number, duration: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
+      };
+      playTone(659.25, 0, 0.16);
+      playTone(880.0, 0.12, 0.22);
+      playTone(1046.5, 0.22, 0.38);
+    } catch {}
+  };
   const [copiedLink, setCopiedLink] = useState(false);
   const [previewMode, setPreviewMode] = useState<'storefront' | 'receipt'>('storefront');
 
@@ -1024,6 +1060,60 @@ export default function ShopSettings() {
                         </div>
                       );
                     })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Card 4: Kitchen Display (KDS) Sound Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Volume2 className="size-4 text-emerald-500" />
+                    <span>{t('settings.shop.operations.kdsSoundTitle', 'Kitchen Display Sound Alerts')}</span>
+                  </CardTitle>
+                  <CardDescription>
+                    {t('settings.shop.operations.kdsSoundDescription', 'Control chime notifications when incoming kitchen orders arrive.')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-border/80 bg-muted/20 gap-3">
+                    <div className="space-y-1 pr-4">
+                      <Label className="text-sm font-semibold">
+                        {t('settings.shop.operations.enableKdsSound', 'Enable Kitchen Chime')}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('settings.shop.operations.enableKdsSoundDesc', 'Plays an audio chime alert on the Kitchen Display screen for every new order ticket.')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          playTestChime();
+                          toast.info(t('settings.shop.operations.testSoundPlayed', 'Chime sound tested!'));
+                        }}
+                        className="text-xs h-8 gap-1.5"
+                      >
+                        <Volume2 className="size-3.5" />
+                        <span>{t('settings.shop.operations.testSound', 'Test Chime')}</span>
+                      </Button>
+                      <Switch
+                        checked={kdsSoundEnabled}
+                        onCheckedChange={(checked) => {
+                          setKdsSoundEnabled(checked);
+                          try {
+                            localStorage.setItem('restro_kds_sound_v1', String(checked));
+                          } catch {}
+                          toast.success(
+                            checked
+                              ? t('restaurant.soundOn', 'Sound Alerts On')
+                              : t('restaurant.soundOff', 'Sound Muted')
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

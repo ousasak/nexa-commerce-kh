@@ -26,6 +26,8 @@ class User extends Authenticatable
         'login_failed_count',
         'login_locked_count',
         'login_locked_until',
+        'google_id',
+        'google_email',
     ];
 
     protected $hidden = [

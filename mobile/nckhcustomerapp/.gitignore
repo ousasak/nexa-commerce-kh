@@ -21,3 +21,5 @@ android/.gradle/
 # iOS
 ios/Pods/
 ios/.symlinks/
+# Widget Preview related
+.widget_preview/

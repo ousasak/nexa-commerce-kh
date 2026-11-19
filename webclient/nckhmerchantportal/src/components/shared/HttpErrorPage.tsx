@@ -80,7 +80,7 @@ export const HttpErrorPage: React.FC<HttpErrorPageProps> = ({
   showBackButton,
   showHomeButton = true,
   showRetryButton,
-  showSearchButton = true,
+  showSearchButton = false,
   showContactButton,
   onRetry,
   onSearchDocs,
@@ -413,17 +413,6 @@ export const HttpErrorPage: React.FC<HttpErrorPageProps> = ({
             >
               <RotateCw size={15} />
               <span>{t('errorPage.tryAgain', 'Try Again')}</span>
-            </button>
-          )}
-
-          {showSearchButton && (
-            <button
-              type="button"
-              onClick={handleSearchButtonClick}
-              className="h-10 px-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 active:scale-[0.98] text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer select-none shadow-2xs"
-            >
-              <Search size={15} />
-              <span>{t('errorPage.searchDocs', 'Search the docs')}</span>
             </button>
           )}
 

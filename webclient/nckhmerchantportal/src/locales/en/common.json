@@ -47,10 +47,15 @@
   "saveChanges": "Save Changes",
   "create": "Create",
   "cancel": "Cancel",
+  "confirmDeleteTitle": "Delete Item?",
+  "confirmDeleteSubtitle": "This action cannot be undone.",
+  "confirmDeleteNamedDesc": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+  "confirmDeleteGenericDesc": "Are you sure you want to delete this item? This action cannot be undone.",
   "category": "Category",
   "categories": "Categories",
   "footerNote": "© 2026 MiniStore KH. Made for better store management.",
   "breadcrumb": {
+    "Home": "Home",
     "Settings": "Settings",
     "Payment (ABA Pay)": "Payment (ABA Pay)",
     "Telegram Bot": "Telegram Bot",
@@ -59,7 +64,15 @@
     "Overview": "Overview",
     "Analytics": "Analytics",
     "Channels": "Channels",
-    "Account": "Account"
+    "Account": "Account",
+    "Customers": "Customers",
+    "Orders": "Orders",
+    "Products": "Products",
+    "Categories": "Categories",
+    "Stock & Inventory": "Stock & Inventory",
+    "Receipts": "Receipts",
+    "Reports": "Reports",
+    "Dashboard": "Dashboard"
   },
   "errorPage": {
     "backToDashboard": "Back to Dashboard",

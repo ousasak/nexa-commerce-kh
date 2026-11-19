@@ -215,17 +215,25 @@ class StockService
             return false;
         }
 
+        $shopName = mb_strtoupper($shop->shop_name ?: $shop->username, 'UTF-8');
+        $now = date('d-m-Y H:i:s');
         $lines = [
-            '⚠️ <b>ការជូនដំណឹងអំពីស្តុកទំនិញ (Low Stock Alert)</b>',
-            '',
-            '🏪 <b>ហាង:</b> '.($shop->shop_name ?: $shop->username),
-            '',
+            "🏪 <b>{$shopName}</b>",
+            "━━━━━━━━━━━━━━━━━━━━",
+            "⚠️ <b>ការជូនដំណឹងអំពីស្តុកទំនិញ / LOW STOCK ALERT</b>",
+            "━━━━━━━━━━━━━━━━━━━━",
+            "📅 <b>កាលបរិច្ឆេទ:</b> {$now}",
+            "",
+            "📋 <b>បញ្ជីទំនិញជិតអស់ពីស្តុក:</b>",
         ];
 
         foreach ($lowItems as $item) {
-            $status = $item['quantity'] <= 0 ? '❌ អស់ពីស្តុក (0)' : "⚠️ នៅសល់តិច ({$item['quantity']})";
+            $status = $item['quantity'] <= 0 ? '❌ <b>អស់ពីស្តុក (0)</b>' : "⚠️ <b>នៅសល់តែ ({$item['quantity']})</b>";
             $lines[] = "• {$item['name']}: {$status}";
         }
+
+        $lines[] = "━━━━━━━━━━━━━━━━━━━━";
+        $lines[] = "📦 <i>សូមបំពេញស្តុកទំនិញបន្ថែម ដើម្បីកុំឱ្យខកខានការលក់!</i>";
 
         return TelegramService::sendShopNotification($shop, implode("\n", $lines));
     }

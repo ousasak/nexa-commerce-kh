@@ -3,10 +3,26 @@ import api from '../api/client';
 export const reportService = {
   getOverview: (shopId: number | string) =>
     api.get('/api/reports/overview', { params: { shop_id: shopId } }).then((r) => r.data),
-  getSales: (shopId: number | string, period?: string, days?: number) =>
-    api.get('/api/reports/sales', { params: { shop_id: shopId, period, days } }).then((r) => r.data),
-  getSalesReport: (shopId: number | string, period?: string, days?: number) =>
-    api.get('/api/reports/sales', { params: { shop_id: shopId, period, days } }).then((r) => r.data),
+  getSales: (shopId: number | string, period?: string, days?: number, filters?: { channel?: string; payment?: string }) =>
+    api.get('/api/reports/sales', {
+      params: {
+        shop_id: shopId,
+        period,
+        days,
+        channel: filters?.channel && filters.channel !== 'all' ? filters.channel : undefined,
+        payment_method: filters?.payment && filters.payment !== 'all' ? filters.payment : undefined,
+      },
+    }).then((r) => r.data),
+  getSalesReport: (shopId: number | string, period?: string, days?: number, filters?: { channel?: string; payment?: string }) =>
+    api.get('/api/reports/sales', {
+      params: {
+        shop_id: shopId,
+        period,
+        days,
+        channel: filters?.channel && filters.channel !== 'all' ? filters.channel : undefined,
+        payment_method: filters?.payment && filters.payment !== 'all' ? filters.payment : undefined,
+      },
+    }).then((r) => r.data),
   getProducts: (shopId: number | string) =>
     api.get('/api/reports/products', { params: { shop_id: shopId } }).then((r) => r.data),
   getProductReport: (shopId: number | string) =>

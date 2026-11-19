@@ -11,6 +11,7 @@ import { ProductFilters } from './ProductFilters';
 import { ProductTable } from './ProductTable';
 import { ProductHeaderActions } from './ProductActions';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
 
 export default function ProductsPage() {
   const { user } = useAuth();
@@ -46,6 +47,10 @@ export default function ProductsPage() {
 
   // Actions Dropdown
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+
+  // Delete modal state
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeletingProduct, setIsDeletingProduct] = useState(false);
 
   // Load products & categories
   const loadData = () => {
@@ -84,26 +89,28 @@ export default function ProductsPage() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Delete product
-  const remove = async (product: Product) => {
+  // Delete product - open confirmation dialog
+  const remove = (product: Product) => {
     setOpenDropdownId(null);
-    if (
-      !window.confirm(
-        t('products.confirmDelete', `Are you sure you want to delete "${product.name}"?`, {
-          name: product.name,
-        })
-      )
-    )
-      return;
+    setProductToDelete(product);
+  };
+
+  // Confirm delete product
+  const handleConfirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    setIsDeletingProduct(true);
     try {
-      await productService.delete(product.id);
-      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      await productService.delete(productToDelete.id);
+      setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
       toast.success(t('products.toast.deleteSuccess', 'Product deleted successfully'));
+      setProductToDelete(null);
     } catch (err: any) {
       toast.error(
         err?.response?.data?.detail ||
           t('products.toast.deleteFailed', 'Failed to delete product')
       );
+    } finally {
+      setIsDeletingProduct(false);
     }
   };
 
@@ -277,6 +284,29 @@ export default function ProductsPage() {
         onDropdownToggle={(id) => setOpenDropdownId(openDropdownId === id ? null : id)}
         onDelete={remove}
         onPageChange={setCurrentPage}
+      />
+
+      {/* Product Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={Boolean(productToDelete)}
+        title={t('products.confirmDeleteTitle', 'Delete Product?')}
+        description={
+          productToDelete
+            ? t(
+                'products.confirmDeleteNamedDesc',
+                `Are you sure you want to delete product "${productToDelete.name}"? This action cannot be undone.`,
+                { name: productToDelete.name }
+              )
+            : t(
+                'products.confirmDeleteDesc',
+                'Are you sure you want to delete this product? This action cannot be undone.'
+              )
+        }
+        isDeleting={isDeletingProduct}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        deleteLabel={t('common.delete', 'Delete')}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={handleConfirmDeleteProduct}
       />
     </div>
   );

@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import toast from '../../utils/toast';
+import { printReceiptHtml } from '../../utils/printReceipt';
 import {
   Search,
   ChevronDown,
@@ -40,6 +42,8 @@ export default function ReceiptsPage() {
   const [generatingId, setGeneratingId] = useState<number | string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
+  const [printingOrderId, setPrintingOrderId] = useState<number | string | null>(null);
+  const printRenderRef = useRef<HTMLDivElement>(null);
 
   // Filters & Controls
   const [search, setSearch] = useState('');
@@ -93,16 +97,53 @@ export default function ReceiptsPage() {
     window.open(fullUrl(`/api/orders/${id}/receipt?lang=${lang}`), '_blank');
   };
 
-  const handlePrint = (order: Order) => {
-    setPrintOrder(order);
-    const cleanup = () => {
-      setPrintOrder(null);
-    };
-    window.addEventListener('afterprint', cleanup, { once: true });
-    setTimeout(() => {
-      window.print();
-    }, 60);
+  const triggerDirectPrint = (targetOrder: Order) => {
+    const renderNode = printRenderRef.current;
+    if (!renderNode) return;
+
+    const html = renderNode.innerHTML;
+    if (!html || html.trim().length === 0) {
+      // Re-queue on next frame if React is still committing render
+      requestAnimationFrame(() => triggerDirectPrint(targetOrder));
+      return;
+    }
+
+    printReceiptHtml(html, {
+      title: `Receipt #${targetOrder.order_number || targetOrder.id}`,
+      onAfterPrint: () => {
+        setPrintingOrderId(null);
+      },
+    });
   };
+
+  const handlePrint = async (order: Order) => {
+    let targetOrder = order;
+
+    // Defensively ensure order items are loaded if missing
+    if (!targetOrder.items || targetOrder.items.length === 0) {
+      setPrintingOrderId(order.id);
+      try {
+        const full = await orderService.getOrder(order.id);
+        if (full && full.items && full.items.length > 0) {
+          targetOrder = full;
+        }
+      } catch (err) {
+        console.warn('Could not fetch full order details for print:', err);
+      }
+    }
+
+    setPrintOrder(targetOrder);
+    setPrintingOrderId(targetOrder.id);
+  };
+
+  useEffect(() => {
+    if (printOrder && printingOrderId && printOrder.id === printingOrderId) {
+      const raf = requestAnimationFrame(() => {
+        triggerDirectPrint(printOrder);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [printOrder, printingOrderId]);
 
   const handleViewPdf = (order: Order) => {
     const lang = isKhmer ? 'km' : 'en';
@@ -413,10 +454,10 @@ export default function ReceiptsPage() {
       </div>
 
       {/* SmartHR Employee Table Filter Bar */}
-      <div className="flex flex-wrap items-center gap-2.5 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
+      <div className="flex flex-wrap items-center gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel font-sans">
         {/* Search Box */}
         <div className="relative w-full sm:w-64 md:w-72">
-          <Search className="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="search"
             value={search}
@@ -425,7 +466,7 @@ export default function ReceiptsPage() {
               setCurrentPage(1);
             }}
             placeholder={t('receipts.searchPlaceholder', 'Search by order #, customer...')}
-            className="h-9 w-full pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+            className="h-10 sm:h-10.5 w-full pl-10 pr-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
           />
         </div>
 
@@ -437,13 +478,13 @@ export default function ReceiptsPage() {
               setPaymentFilter(e.target.value as any);
               setCurrentPage(1);
             }}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+            className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
           >
             <option value="all">{t('receipts.allPayments', 'All Payments')}</option>
             <option value="cash">{t('receipts.cashWithIcon', 'Cash')}</option>
             <option value="bank">{t('receipts.bankWithIcon', 'Bank / KHQR')}</option>
           </select>
-          <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* Receipt PDF Status Filter */}
@@ -454,13 +495,13 @@ export default function ReceiptsPage() {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
+            className="h-10 sm:h-10.5 pl-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-100 appearance-none cursor-pointer focus:outline-none focus:border-orange-500 transition-all"
           >
             <option value="all">{t('receipts.allReceipts', 'All Receipts')}</option>
             <option value="generated">{t('receipts.generatedPdf', 'Generated PDF')}</option>
             <option value="not_generated">{t('receipts.notGenerated', 'Not Generated')}</option>
           </select>
-          <ChevronDown className="size-3 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="size-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* Apply Button */}
@@ -473,9 +514,9 @@ export default function ReceiptsPage() {
           style={{
             backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
           }}
-          className="h-9 px-3.5 rounded-lg hover:brightness-90 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold inline-flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
         >
-          <Check className="size-3.5 stroke-[2.5]" />
+          <Check className="size-4 stroke-[2.5]" />
           <span>{t('buttons.apply', t('common.apply', 'Apply'))}</span>
         </button>
 
@@ -489,7 +530,7 @@ export default function ReceiptsPage() {
             setDateFilter('all');
             setCurrentPage(1);
           }}
-          className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="h-10 sm:h-10.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
         >
           {t('buttons.reset', t('common.reset', 'Reset'))}
         </button>
@@ -514,9 +555,9 @@ export default function ReceiptsPage() {
       {/* Receipts Table Card */}
       <div className="rounded-xl border border-[#dfe7df] dark:border-[#2a4245] bg-white dark:bg-[#142629] shadow-panel overflow-hidden font-sans">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] text-[#71817e] dark:text-[#a0b0ad] font-semibold uppercase text-[11px] tracking-wider bg-[#f7f8f2]/90 dark:bg-[#17282b]/90">
+              <tr className="border-b border-[#dfe7df] dark:border-[#2a4245] text-[#71817e] dark:text-[#a0b0ad] font-bold uppercase text-xs tracking-wider bg-[#f7f8f2]/90 dark:bg-[#17282b]/90">
                 {/* Index Sort */}
                 <th
                   onClick={() => {
@@ -763,23 +804,24 @@ export default function ReceiptsPage() {
 
                     {/* Action Buttons */}
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
                           disabled={isGenerating}
                           onClick={() => makeReceipt(o.id)}
-                          className="h-7 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-50"
+                          className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                         >
-                          <Download className="size-3 text-slate-400" />
+                          <Download className="size-3.5 text-slate-400" />
                           <span>{isGenerating ? '...' : t('receipts.downloadPdf', 'PDF')}</span>
                         </button>
                         <button
                           type="button"
+                          disabled={printingOrderId === o.id}
                           onClick={() => handlePrint(o)}
-                          className="h-7 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                          className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
                         >
-                          <Printer className="size-3 text-slate-400" />
-                          <span>{t('receipts.print', 'Print')}</span>
+                          <Printer className="size-3.5 text-slate-400" />
+                          <span>{printingOrderId === o.id ? '...' : t('receipts.print', 'Print')}</span>
                         </button>
                       </div>
                     </td>
@@ -820,38 +862,54 @@ export default function ReceiptsPage() {
         )}
       </div>
 
-      {/* Direct Native Print Canvas (No preview modal) */}
-      {printOrder && (
-        <div
-          id="direct-print-container"
-          className="fixed -left-[99999px] top-0 opacity-0 pointer-events-none print:static print:left-0 print:opacity-100 print:pointer-events-auto print:block print:w-full print:m-0 print:p-0"
-        >
-          <style>{`
-            @media print {
-              @page {
-                size: A4 portrait !important;
-                margin: 8mm 10mm !important;
+      {/* Hidden Isolated Render Container for Direct Native Print */}
+      <div
+        ref={printRenderRef}
+        id="receipt-print-stage"
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          left: '-99999px',
+          top: 0,
+          width: '800px',
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: -9999,
+        }}
+      >
+        {printOrder && <ReceiptPrintDocument order={printOrder} />}
+      </div>
+
+      {/* Fallback portal for direct native window.print / Cmd+P */}
+      {printOrder &&
+        createPortal(
+          <div
+            id="direct-print-portal"
+            className="hidden print:block print:w-full print:m-0 print:p-0"
+          >
+            <style>{`
+              @media print {
+                @page {
+                  size: A4 portrait !important;
+                  margin: 8mm 10mm !important;
+                }
+                body > *:not(#direct-print-portal) {
+                  display: none !important;
+                }
+                #direct-print-portal {
+                  display: block !important;
+                  position: static !important;
+                  width: 100% !important;
+                  background: white !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
               }
-              body * {
-                visibility: hidden !important;
-              }
-              #direct-print-container, #direct-print-container * {
-                visibility: visible !important;
-              }
-              #direct-print-container {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-              }
-            }
-          `}</style>
-          <ReceiptPrintDocument order={printOrder} />
-        </div>
-      )}
+            `}</style>
+            <ReceiptPrintDocument order={printOrder} />
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 {
+  "home": "ទំព័រដើម",
   "menu": "មីនុយ",
   "dashboard": "ផ្ទាំងគ្រប់គ្រង",
   "pos": "ប្រព័ន្ធគិតលុយ POS",
@@ -32,6 +33,7 @@
   "groupChannels": "បណ្តាញ & ការតភ្ជាប់",
   "groupSystem": "ប្រព័ន្ធ & ការកំណត់",
   "storefront": "ហាងអនឡាញ Storefront",
+  "storefrontTheme": "តុបតែងហាង",
   "searchPlaceholder": "ស្វែងរក...",
   "defaultShopSubtitle": "ហាងលក់រាយ និងទូទាត់ប្រាក់",
   "storefrontOnline": "ហាងអនឡាញសកម្ម",

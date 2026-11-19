@@ -46,6 +46,36 @@ class Shop extends Model
         ];
     }
 
+    public function setBannerAttribute($value): void
+    {
+        $this->attributes['banner'] = $value ?? '';
+    }
+
+    public function setLogoAttribute($value): void
+    {
+        $this->attributes['logo'] = $value ?? '';
+    }
+
+    public function setShopNameAttribute($value): void
+    {
+        $this->attributes['shop_name'] = $value ?? '';
+    }
+
+    public function setPlanAttribute($value): void
+    {
+        $this->attributes['plan'] = $value ?? 'starter';
+    }
+
+    public function setCurrencyAttribute($value): void
+    {
+        $this->attributes['currency'] = $value ?? 'USD';
+    }
+
+    public function setStatusAttribute($value): void
+    {
+        $this->attributes['status'] = $value ?? 'active';
+    }
+
     public function users()
     {
         return $this->hasMany(User::class, 'shop_id');

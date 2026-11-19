@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Send,
   ExternalLink,
@@ -23,6 +23,17 @@ interface TelegramReportModalProps {
   onShareLinkFallback: () => void;
 }
 
+const decodeEntities = (str: string): string => {
+  if (!str) return '';
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'");
+};
+
 export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
   language,
   isOpen,
@@ -38,6 +49,12 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const cleanPlainText = useMemo(() => decodeEntities(reportPlainText), [reportPlainText]);
+  const cleanHtml = useMemo(() => {
+    if (!reportHtml) return '';
+    return reportHtml.replace(/&amp;/g, '&');
+  }, [reportHtml]);
+
   const handleSendViaBot = async () => {
     if (!shopId) return;
     setSending(true);
@@ -49,27 +66,32 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
           if (err?.response?.status === 404) {
             return telegramService.test({
               shop_id: shopId,
-              message: reportPlainText,
+              message: cleanPlainText,
             });
           }
           throw err;
         });
 
-      if (res?.data?.success || res?.status === 200) {
+      if (res?.ok === true || res?.success === true || res?.data?.success === true || res?.status === 200) {
         toast.success(
-          t('reports.telegramSentSuccess', 'Summary report successfully delivered to your Telegram channel/group!')
+          res?.detail ||
+            t('reports.sentSuccess', 'Summary report successfully delivered to your Telegram channel/group!')
         );
         onClose();
       } else {
         toast.error(
-          res?.data?.message ||
-            t('reports.telegramSentFailed', 'Failed to dispatch telegram notification. Please check your Bot connection.')
+          res?.detail ||
+            res?.message ||
+            res?.data?.message ||
+            t('reports.failedToDispatchBot', 'Failed to dispatch telegram notification. Please check your Bot connection.')
         );
       }
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ||
-          t('reports.telegramError', 'Error connecting to Telegram. Falling back to direct app link.')
+          err?.response?.data?.detail ||
+          err?.message ||
+          t('reports.failedToDispatchBot', 'Error connecting to Telegram. Falling back to direct app link.')
       );
     } finally {
       setSending(false);
@@ -77,9 +99,9 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
   };
 
   const handleCopyText = () => {
-    navigator.clipboard.writeText(reportPlainText);
+    navigator.clipboard.writeText(cleanPlainText);
     setCopied(true);
-    toast.success(t('reports.copiedToClipboard', 'Report text copied to clipboard!'));
+    toast.success(t('reports.reportCopied', 'Report text copied to clipboard!'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -90,8 +112,8 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
       size="xl"
       icon={<Bot className="size-5" />}
       iconVariant="sky"
-      title={t('reports.telegramPreviewTitle', 'Telegram Dispatch Preview')}
-      subtitle={t('reports.telegramPreviewDesc', 'Review formatted summary before broadcasting to your channel')}
+      title={t('reports.telegramModalTitle', 'Telegram Dispatch Preview')}
+      subtitle={t('reports.telegramModalSubtitle', 'Review formatted summary before broadcasting to your channel')}
       footer={
         <ModalFooter
           onCancel={onClose}
@@ -134,7 +156,7 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
           </label>
           <div
             className="p-4 rounded-2xl bg-sky-50/50 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/40 text-xs text-slate-800 dark:text-slate-200 overflow-x-auto"
-            dangerouslySetInnerHTML={{ __html: reportHtml }}
+            dangerouslySetInnerHTML={{ __html: cleanHtml }}
           />
         </div>
 
@@ -154,7 +176,7 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({
             </button>
           </div>
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 font-mono text-[11px] text-slate-800 dark:text-slate-200 max-h-48 overflow-y-auto leading-relaxed whitespace-pre-wrap select-all">
-            {reportPlainText}
+            {cleanPlainText}
           </div>
         </div>
       </div>

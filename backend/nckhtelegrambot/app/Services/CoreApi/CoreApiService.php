@@ -111,9 +111,9 @@ class CoreApiService
     }
 
     /**
-     * Link Telegram chat to a shop using Profile ID and Secret Key.
+     * Link Telegram chat to a shop using Profile ID and Secret Key / Linking Token.
      */
-    public function linkPaymentChat(string $profileId, string $secretKey, string|int $chatId): array
+    public function linkPaymentChat(string $profileId, string $secretKey, string|int $chatId, array $userMeta = []): array
     {
         try {
             // First attempt: /api/bot-service/link
@@ -121,6 +121,7 @@ class CoreApiService
                 'profile_id' => $profileId,
                 'secret_key' => $secretKey,
                 'chat_id' => (string) $chatId,
+                'user_info' => $userMeta,
             ]);
 
             if ($resp->successful()) {
@@ -140,7 +141,7 @@ class CoreApiService
 
             return [
                 'ok' => false,
-                'detail' => $fallback->json('detail') ?? $resp->json('detail') ?? 'Profile ID ឬ Secret Key មិនត្រឹមត្រូវទេ។',
+                'detail' => $resp->json('detail') ?? $fallback->json('detail') ?? 'Profile ID ឬ Secret Key មិនត្រឹមត្រូវទេ។',
             ];
         } catch (Throwable $e) {
             Log::error("CoreApiService::linkPaymentChat error: " . $e->getMessage());
@@ -148,6 +149,30 @@ class CoreApiService
                 'ok' => false,
                 'detail' => 'មិនអាចភ្ជាប់ទៅកាន់ Core API បានទេ៖ ' . $e->getMessage(),
             ];
+        }
+    }
+
+    /**
+     * Fetch Sales Report on demand from Core API.
+     */
+    public function getSalesReport(int|string $shopId, string $period, string|int $chatId): ?array
+    {
+        try {
+            $resp = $this->client()->get("{$this->baseUrl}/api/bot-service/report", [
+                'shop_id' => $shopId,
+                'period' => $period,
+                'chat_id' => (string) $chatId,
+            ]);
+
+            if ($resp->successful()) {
+                return $resp->json('report');
+            }
+
+            Log::warning("CoreApiService::getSalesReport failed for shop {$shopId}: {$resp->status()}");
+            return null;
+        } catch (Throwable $e) {
+            Log::error("CoreApiService::getSalesReport error: " . $e->getMessage());
+            return null;
         }
     }
 

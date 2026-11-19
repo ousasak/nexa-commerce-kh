@@ -117,7 +117,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
       <div className="absolute top-3.5 right-4 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
         {actions}
         {showClose && onClose && (
-          <CloseButton onClose={onClose} size="md" variant="default" />
+          <CloseButton onClose={onClose} size="sm" variant="default" />
         )}
       </div>
     </div>
@@ -223,7 +223,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
 
   const renderSubmitIcon = () => {
     const icon = submitIcon || confirmIcon
-    if (!icon) return <Check size={14} strokeWidth={2.5} />
+    if (!icon) return <Check size={16} strokeWidth={2.5} />
     if (React.isValidElement(icon)) return icon
     if (
       typeof icon === 'function' ||
@@ -231,7 +231,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
         icon !== null &&
         ('render' in (icon as any) || '$$typeof' in (icon as any)))
     ) {
-      return React.createElement(icon as React.ElementType, { size: 14 })
+      return React.createElement(icon as React.ElementType, { size: 16 })
     }
     return icon
   }
@@ -280,7 +280,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="h-10 px-5 rounded-xl border border-border/80 dark:border-slate-700 bg-card dark:bg-slate-800/80 text-xs sm:text-[13px] font-bold text-muted-foreground dark:text-slate-300 hover:text-foreground dark:hover:text-white hover:bg-muted dark:hover:bg-slate-700 transition-colors cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed select-none"
+            className="h-10.5 sm:h-11 px-5 rounded-xl border border-border/80 dark:border-slate-700 bg-card dark:bg-slate-800/80 text-sm font-bold text-muted-foreground dark:text-slate-300 hover:text-foreground dark:hover:text-white hover:bg-muted dark:hover:bg-slate-700 transition-colors cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed select-none"
           >
             {effectiveCancelLabel}
           </button>
@@ -291,10 +291,10 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
             type={submitButtonType}
             onClick={effectiveOnSubmit}
             disabled={isSubmitting || disabled}
-            className={`h-10 inline-flex items-center justify-center gap-2 px-6 rounded-xl text-xs sm:text-[13px] font-bold hover:shadow transition-all disabled:opacity-50 cursor-pointer active:scale-95 disabled:cursor-not-allowed select-none ${getSubmitVariantStyles()}`}
+            className={`h-10.5 sm:h-11 inline-flex items-center justify-center gap-2 px-6 rounded-xl text-sm font-bold hover:shadow transition-all disabled:opacity-50 cursor-pointer active:scale-95 disabled:cursor-not-allowed select-none ${getSubmitVariantStyles()}`}
           >
             {isSubmitting ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
               renderSubmitIcon()
             )}

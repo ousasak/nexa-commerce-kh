@@ -142,6 +142,29 @@ const getRenewalCycleLabel = (planKey: string, t: any) => {
   return t('upgrade.currentPlan.monthly', 'Monthly');
 };
 
+const getPlanVisuals = (planKey?: string) => {
+  const p = (planKey || '').toLowerCase();
+  if (p === 'premium') {
+    return {
+      Icon: Crown,
+      gradient: 'from-amber-500 via-amber-600 to-yellow-600 shadow-amber-500/20 ring-amber-100/80 dark:ring-amber-950/40',
+      badgeBg: 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800',
+    };
+  }
+  if (p === 'growth') {
+    return {
+      Icon: TrendingUp,
+      gradient: 'from-sky-600 via-teal-600 to-emerald-600 shadow-teal-600/20 ring-teal-100/80 dark:ring-teal-950/40',
+      badgeBg: 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-800',
+    };
+  }
+  return {
+    Icon: Store,
+    gradient: 'from-teal-600 via-teal-700 to-emerald-700 shadow-teal-700/20 ring-teal-100/80 dark:ring-teal-950/40',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800',
+  };
+};
+
 export default function UpgradePlan() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -167,10 +190,24 @@ export default function UpgradePlan() {
     };
   }, [user.shop_id]);
 
+  const [syncing, setSyncing] = useState(false);
+
   const loadShop = () => {
     return getShopDetail(user.shop_id)
       .then((s) => setShop(s))
       .catch(() => {});
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      await loadShop();
+      toast.success(t('upgrade.toast.syncSuccess', 'Status updated successfully!'));
+    } catch {
+      toast.error(t('upgrade.toast.syncFailed', 'Failed to update status. Please try again.'));
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const startPoll = (orderId: number | string, transactionId = '') => {
@@ -302,74 +339,100 @@ export default function UpgradePlan() {
   const currentPlanKey = shop?.plan?.toLowerCase() || 'starter';
   const isShopExpired = shop?.is_expired;
   const isKhmer = i18n.language === 'kh';
+  const planVisuals = getPlanVisuals(shop?.plan);
+  const PlanIcon = planVisuals.Icon;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-16 px-2 sm:px-4">
       {/* Top Breadcrumb & Page Header */}
-      <div className="space-y-2">
-        <Breadcrumbs />
-        <div className="space-y-1.5 pt-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('upgrade.badge', 'Subscription & Billing')}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
+          <Breadcrumbs />
+          <div className="space-y-1.5 pt-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{t('upgrade.badge', 'Subscription & Billing')}</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              {t('upgrade.title', 'Upgrade Your Store Plan')}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+              {t(
+                'upgrade.subtitle',
+                'Scale your products, unlock multi-channel dining orders, and power your store with real-time KHQR & Telegram alerts.'
+              )}
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {t('upgrade.title', 'Upgrade Your Store Plan')}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
-            {t(
-              'upgrade.subtitle',
-              'Scale your products, unlock multi-channel dining orders, and power your store with real-time KHQR & Telegram alerts.'
-            )}
-          </p>
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSync}
+          disabled={syncing}
+          className="self-start sm:self-auto h-9 rounded-xl border-slate-200/90 dark:border-slate-800 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-2xs gap-1.5 shrink-0"
+        >
+          <RefreshCw className={cn('w-3.5 h-3.5 text-slate-500', syncing && 'animate-spin')} />
+          <span>{syncing ? t('upgrade.syncing', 'Syncing...') : t('upgrade.syncStatus', 'Sync Status')}</span>
+        </Button>
       </div>
 
       {/* Current Subscription Hero Banner */}
-      <Card className="overflow-hidden border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel rounded-2xl">
-        <CardContent className="p-5 sm:p-6">
+      <Card className="relative overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel rounded-2xl">
+        {/* Subtle decorative top brand accent */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-500 to-sky-500" />
+
+        <CardContent className="p-5 sm:p-6 pt-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             {/* Left: Plan Info */}
-            <div className="flex items-center gap-4 min-w-[280px]">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-orange-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                <Crown className="w-6 h-6" />
+            <div className="flex items-start sm:items-center gap-4 min-w-[280px]">
+              <div
+                className={cn(
+                  'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br text-white flex items-center justify-center shrink-0 shadow-md ring-4',
+                  planVisuals.gradient
+                )}
+              >
+                <PlanIcon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
               </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    {t('upgrade.currentPlan.label', 'Current Active Plan')}
-                  </span>
+              <div className="space-y-1.5 min-w-0">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
+                  {t('upgrade.currentPlan.label', 'Current Active Plan')}
+                </span>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white capitalize tracking-tight leading-none">
+                    {shop?.plan
+                      ? shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)
+                      : 'Starter'}
+                    {t('upgrade.currentPlan.planSuffix') ? ` ${t('upgrade.currentPlan.planSuffix')}` : ''}
+                  </h2>
+
                   {isShopExpired ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800">
-                      <AlertCircle className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800">
+                      <AlertCircle className="w-3.5 h-3.5" />
                       {t('upgrade.currentPlan.expired', 'Expired')}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       {t('upgrade.currentPlan.active', 'Active')}
                     </span>
                   )}
+
                   {shop?.plan_price > 0 ? (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
                       ${shop.plan_price} USD
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                       {t('upgrade.currentPlan.freeOffer', 'Free Offer')}
                     </span>
                   )}
                 </div>
 
-                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white capitalize tracking-tight">
-                  {shop?.plan
-                    ? shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)
-                    : 'Starter'}{' '}
-                  {t('upgrade.currentPlan.planSuffix', 'Plan')}
-                </h2>
-
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>
                     {shop?.expires_at
                       ? t('upgrade.currentPlan.validUntil', {
@@ -393,53 +456,57 @@ export default function UpgradePlan() {
             </div>
 
             {/* Right: Quick Quota Metrics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 lg:max-w-2xl border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800/80 pt-4 lg:pt-0 lg:pl-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 lg:max-w-2xl border-t lg:border-t-0 lg:border-l border-slate-200/70 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6">
               {/* Product Limit */}
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
-                <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                  <Package className="w-4 h-4" />
+              <div className="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 transition-all shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 border border-orange-500/20">
+                  <Package className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">
                     {t('upgrade.currentPlan.productLimit', 'Product Limit')}
                   </p>
-                  <p className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-                    {shop?.max_products || 20}{' '}
-                    <span className="text-xs font-normal text-slate-400">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                      {shop?.max_products || 20}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {t('upgrade.currentPlan.items', 'items')}
                     </span>
-                  </p>
+                  </div>
                 </div>
               </div>
 
               {/* Category Limit */}
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <FolderTree className="w-4 h-4" />
+              <div className="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 transition-all shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                  <FolderTree className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">
                     {t('upgrade.currentPlan.categoryLimit', 'Category Limit')}
                   </p>
-                  <p className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-                    {shop?.max_categories || 10}{' '}
-                    <span className="text-xs font-normal text-slate-400">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                      {shop?.max_categories || 10}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {t('upgrade.currentPlan.groups', 'groups')}
                     </span>
-                  </p>
+                  </div>
                 </div>
               </div>
 
               {/* Renewal Cycle */}
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
-                <div className="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 transition-all shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20">
+                  <Clock className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">
                     {t('upgrade.currentPlan.renewalCycle', 'Renewal Cycle')}
                   </p>
-                  <p className="text-base font-bold text-slate-900 dark:text-white leading-tight capitalize">
+                  <p className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight capitalize">
                     {getRenewalCycleLabel(shop?.plan, t)}
                   </p>
                 </div>
@@ -488,14 +555,14 @@ export default function UpgradePlan() {
               >
                 {/* Floating Top Badges */}
                 {isRecommended && (
-                  <div className="absolute top-0 right-0 left-0 bg-primary text-white text-[11px] font-extrabold uppercase tracking-wider text-center py-1 flex items-center justify-center gap-1.5 shadow-xs">
+                  <div className="absolute top-0 right-0 left-0 bg-primary text-white text-[11px] font-extrabold uppercase tracking-wide text-center py-1 flex items-center justify-center gap-1.5 shadow-xs">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{t('upgrade.plans.mostPopular', 'Most Popular Choice')}</span>
                   </div>
                 )}
 
                 {isPremium && (
-                  <div className="absolute top-0 right-0 left-0 bg-slate-900 dark:bg-slate-800 text-amber-300 text-[11px] font-extrabold uppercase tracking-wider text-center py-1 flex items-center justify-center gap-1.5">
+                  <div className="absolute top-0 right-0 left-0 bg-slate-900 dark:bg-slate-800 text-amber-300 text-[11px] font-extrabold uppercase tracking-wide text-center py-1 flex items-center justify-center gap-1.5">
                     <Crown className="w-3.5 h-3.5 text-amber-400" />
                     <span>{t('upgrade.plans.bestValue', 'Best Value · Save 17%')}</span>
                   </div>

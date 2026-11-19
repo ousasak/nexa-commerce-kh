@@ -1,4 +1,5 @@
 {
+  "home": "Home",
   "menu": "Menu",
   "dashboard": "Dashboard",
   "pos": "POS Sale",
@@ -32,6 +33,7 @@
   "groupChannels": "CHANNELS & INTEGRATIONS",
   "groupSystem": "SYSTEM & SETTINGS",
   "storefront": "Storefront",
+  "storefrontTheme": "Storefront Design",
   "searchPlaceholder": "Type to search...",
   "defaultShopSubtitle": "Retail Store & Payments",
   "storefrontOnline": "Active Online Store",

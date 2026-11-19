@@ -10,38 +10,71 @@ use Illuminate\Support\Str;
 
 class TelegramService
 {
-    public static function sendTelegramMessage(string $botToken, string $chatId, string $text): bool
+    public static function sendTelegramMessage(string $botToken, string $chatId, string $text, ?array $replyMarkup = null): bool
+    {
+        $res = self::sendTelegramMessageWithDetail($botToken, $chatId, $text, $replyMarkup);
+        return $res['ok'] ?? false;
+    }
+
+    public static function sendTelegramMessageWithDetail(string $botToken, string $chatId, string $text, ?array $replyMarkup = null): array
     {
         if (empty($botToken) || empty($chatId)) {
-            return false;
+            return ['ok' => false, 'error' => 'Bot token and Chat ID are required.'];
         }
 
         $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+        $payload = [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+            'disable_web_page_preview' => true,
+        ];
+        if (! empty($replyMarkup)) {
+            $payload['reply_markup'] = $replyMarkup;
+        }
 
         // Try 1: HTML parse mode
         try {
-            $resp = Http::timeout(15)->post($url, [
-                'chat_id' => $chatId,
-                'text' => $text,
-                'parse_mode' => 'HTML',
-                'disable_web_page_preview' => true,
-            ]);
+            $resp = Http::timeout(15)->post($url, $payload);
             if ($resp->successful() && ($resp->json('ok') === true)) {
-                return true;
+                return ['ok' => true];
+            }
+            $desc = $resp->json('description');
+            if ($desc) {
+                return ['ok' => false, 'error' => $desc];
             }
         } catch (Exception $e) {
-            // fallback to plain
+            // fallback to plain text below
         }
 
         // Try 2: Plain text fallback
         try {
-            $resp = Http::timeout(15)->post($url, [
-                'chat_id' => $chatId,
-                'text' => strip_tags($text),
-                'disable_web_page_preview' => true,
-            ]);
+            $payload['text'] = strip_tags($text);
+            unset($payload['parse_mode']);
+            $resp = Http::timeout(15)->post($url, $payload);
 
-            return $resp->successful() && ($resp->json('ok') === true);
+            if ($resp->successful() && ($resp->json('ok') === true)) {
+                return ['ok' => true];
+            }
+            $desc = $resp->json('description');
+            return ['ok' => false, 'error' => $desc ?: 'Telegram request failed.'];
+        } catch (Exception $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    public static function answerCallbackQuery(string $botToken, string $callbackQueryId, ?string $text = null): bool
+    {
+        if (empty($botToken) || empty($callbackQueryId)) {
+            return false;
+        }
+        try {
+            $payload = ['callback_query_id' => $callbackQueryId];
+            if ($text) {
+                $payload['text'] = $text;
+            }
+            $resp = Http::timeout(5)->post("https://api.telegram.org/bot{$botToken}/answerCallbackQuery", $payload);
+            return $resp->successful();
         } catch (Exception $e) {
             return false;
         }
@@ -151,7 +184,7 @@ class TelegramService
         return $tg;
     }
 
-    public static function sendShopNotification(Shop $shop, string $text): bool
+    public static function sendShopNotification(Shop $shop, string $text, ?array $replyMarkup = null): bool
     {
         $tg = $shop->telegram_dict();
         $botToken = trim($tg['bot_token'] ?? '');
@@ -172,7 +205,7 @@ class TelegramService
 
         $sent = false;
         foreach ($chatIds as $cid) {
-            if (self::sendTelegramMessage($botToken, $cid, $text)) {
+            if (self::sendTelegramMessage($botToken, $cid, $text, $replyMarkup)) {
                 $sent = true;
             }
         }
@@ -192,12 +225,18 @@ class TelegramService
     public static function notifyShopNewOrder(Shop $shop, string $orderNumber, float $amount, string $currency, string $customerName): bool
     {
         $formattedAmount = number_format($amount, 2);
-        $shopName = $shop->shop_name ?: $shop->username;
-        $text = "🛒 <b>New Order Placed!</b>\n\n".
-                "🏪 <b>Shop:</b> {$shopName}\n".
-                "🧾 <b>Order:</b> #{$orderNumber}\n".
-                "💰 <b>Amount:</b> {$formattedAmount} {$currency}\n".
-                "👤 <b>Customer:</b> {$customerName}";
+        $shopName = mb_strtoupper($shop->shop_name ?: $shop->username, 'UTF-8');
+        $now = date('d-m-Y H:i:s');
+        $text = "🏪 <b>{$shopName}</b>\n".
+                "━━━━━━━━━━━━━━━━━━━━\n".
+                "🛒 <b>មានការកុម្ម៉ង់ទំនិញថ្មី / NEW ORDER</b>\n".
+                "━━━━━━━━━━━━━━━━━━━━\n".
+                "🧾 <b>លេខវិក្កយបត្រ:</b> <code>#{$orderNumber}</code>\n".
+                "📅 <b>កាលបរិច្ឆេទ:</b> {$now}\n".
+                "💰 <b>ទឹកប្រាក់សរុប:</b> <b>\${$formattedAmount} {$currency}</b>\n".
+                "👤 <b>អតិថិជន:</b> {$customerName}\n".
+                "━━━━━━━━━━━━━━━━━━━━\n".
+                "🔔 <i>សូមចូលទៅកាន់ផ្ទាំងគ្រប់គ្រងការលក់ ដើម្បីពិនិត្យមើល!</i>";
 
         return self::sendShopNotification($shop, $text);
     }
@@ -205,24 +244,32 @@ class TelegramService
     public static function notifyShopPaymentSuccessFull(Shop $shop, Order $order, ?array $stockSummary = null): bool
     {
         $formattedAmount = number_format((float) $order->total, 2);
-        $shopName = $shop->shop_name ?: $shop->username;
-        $customerName = $order->customer_name ?: 'Customer';
+        $shopName = mb_strtoupper($shop->shop_name ?: $shop->username, 'UTF-8');
+        $customerName = $order->customer_name ?: 'អតិថិជនទូទៅ';
         $customerPhone = $order->customer_phone ?: '-';
         $customerAddress = $order->customer_address ?: '-';
-        $now = date('Y-m-d H:i:s');
+        $now = date('d-m-Y H:i:s');
+        $paymentMethod = strtoupper($order->payment_method ?: 'KHQR');
+
+        $khrRate = $shop->theme_dict()['exchange_rate_khr'] ?? 4100;
+        $khrAmount = number_format((float) $order->total * $khrRate, 0);
 
         $lines = [
-            '✅ <b>Payment Confirmed!</b>',
-            '',
-            "🏪 <b>Shop:</b> {$shopName}",
-            "🧾 <b>Order:</b> #{$order->order_number}",
-            "💰 <b>Amount:</b> {$formattedAmount} {$order->currency}",
-            '💳 <b>Method:</b> '.strtoupper($order->payment_method),
-            "👤 <b>Customer:</b> {$customerName} ({$customerPhone})",
-            "📍 <b>Address:</b> {$customerAddress}",
-            "🕒 <b>Time:</b> {$now}",
-            '',
-            '📦 <b>Items Ordered:</b>',
+            "🏪 <b>{$shopName}</b>",
+            "━━━━━━━━━━━━━━━━━━━━",
+            "🎉 <b>ការទូទាត់ប្រាក់ជោគជ័យ / PAYMENT SUCCESS</b>",
+            "━━━━━━━━━━━━━━━━━━━━",
+            "🧾 <b>លេខវិក្កយបត្រ:</b> <code>#{$order->order_number}</code>",
+            "📅 <b>កាលបរិច្ឆេទ:</b> {$now}",
+            "💳 <b>វិធីសាស្ត្រទូទាត់:</b> {$paymentMethod}",
+            "💰 <b>ទឹកប្រាក់សរុប:</b> <b>\${$formattedAmount}</b> (៛{$khrAmount})",
+            "",
+            "👤 <b>ព័ត៌មានអតិថិជន:</b>",
+            "• ឈ្មោះ: {$customerName}",
+            "• ទូរស័ព្ទ: {$customerPhone}",
+            "• អាសយដ្ឋាន: {$customerAddress}",
+            "",
+            "📦 <b>មុខទំនិញដែលបានកុម្ម៉ង់:</b>",
         ];
 
         foreach ($order->items as $item) {
@@ -244,8 +291,12 @@ class TelegramService
                 }
             }
 
-            $lines[] = "• {$item->product_name}{$varStr} x{$item->quantity} — $".number_format($item->price, 2)."{$deductInfo}";
+            $itemPrice = number_format((float) $item->price, 2);
+            $lines[] = "• <b>{$item->product_name}</b>{$varStr} x{$item->quantity} — \${$itemPrice}{$deductInfo}";
         }
+
+        $lines[] = "━━━━━━━━━━━━━━━━━━━━";
+        $lines[] = "⚡ <i>សូមរៀបចំទំនិញជូនអតិថិជនឱ្យបានឆាប់រហ័ស!</i>";
 
         return self::sendShopNotification($shop, implode("\n", $lines));
     }

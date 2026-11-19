@@ -206,9 +206,9 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       navbar: {
-        bgColor: '#0f172a',
-        textColor: '#f8fafc',
-        borderColor: '#1e293b',
+        bgColor: '#ffffff',
+        textColor: '#0f172a',
+        borderColor: '#e2e8f0',
         shadow: 'sm',
         transparency: 1,
         height: 64,
@@ -289,19 +289,26 @@ export const useThemeStore = create<ThemeState>()(
           const navLower = s.navbar.bgColor?.toLowerCase();
 
           if (isDark) {
-            // Pure Minimalist Snow adaptation to dark mode
-            if (sideLower === '#ffffff' && navLower === '#ffffff') {
-              nextSidebar = {
-                ...nextSidebar,
-                bgColor: '#0f172a',
-                textColor: '#94a3b8',
-                borderColor: '#1e293b',
-              };
+            // Adapt to dark mode
+            if (
+              navLower === '#ffffff' ||
+              navLower === '#f8fafc' ||
+              navLower === '#fff1f2' ||
+              !navLower
+            ) {
               nextNavbar = {
                 ...nextNavbar,
-                bgColor: '#1e293b',
+                bgColor: '#0f172a',
                 textColor: '#f8fafc',
-                borderColor: '#334155',
+                borderColor: '#1e293b',
+              };
+            }
+            if (sideLower === '#ffffff' || sideLower === '#f8fafc') {
+              nextSidebar = {
+                ...nextSidebar,
+                bgColor: '#0b1329',
+                textColor: '#94a3b8',
+                borderColor: '#1e293b',
               };
             }
             // Rose Champagne adaptation to dark mode
@@ -320,6 +327,25 @@ export const useThemeStore = create<ThemeState>()(
               };
             }
           } else {
+            // Adapt to light mode: header becomes clean crisp white with dark text
+            if (
+              navLower === '#0f172a' ||
+              navLower === '#1e293b' ||
+              navLower === '#0b1329' ||
+              navLower === '#18191e' ||
+              navLower === '#2e1065' ||
+              navLower === '#450a0a' ||
+              navLower === '#050505' ||
+              navLower === '#0c4a6e' ||
+              !navLower
+            ) {
+              nextNavbar = {
+                ...nextNavbar,
+                bgColor: '#ffffff',
+                textColor: '#0f172a',
+                borderColor: '#e2e8f0',
+              };
+            }
             // Restore Pure Minimalist Snow when switching back to light mode
             if (sideLower === '#0f172a' && navLower === '#1e293b' && s.primaryColor === '#4f46e5') {
               nextSidebar = {
@@ -336,7 +362,7 @@ export const useThemeStore = create<ThemeState>()(
               };
             }
             // Restore Rose Champagne when switching back to light mode
-            if (sideLower === '#181014' && navLower === '#2a121d' && s.primaryColor === '#f43f5e') {
+            if (sideLower === '#181014' && (navLower === '#2a121d' || navLower === '#0f172a') && s.primaryColor === '#f43f5e') {
               nextSidebar = {
                 ...nextSidebar,
                 bgColor: '#f8fafc',
@@ -421,9 +447,9 @@ export const useThemeStore = create<ThemeState>()(
             roundedStyle: 'rounded-xl',
           },
           navbar: {
-            bgColor: '#0f172a',
-            textColor: '#f8fafc',
-            borderColor: '#1e293b',
+            bgColor: '#ffffff',
+            textColor: '#0f172a',
+            borderColor: '#e2e8f0',
             shadow: 'sm',
             transparency: 1,
             height: 64,
@@ -482,6 +508,24 @@ export const useThemeStore = create<ThemeState>()(
     {
       name: 'ministorekh-theme-customizer',
       storage: createJSONStorage(() => localStorage),
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (!version || version < 2) {
+          if (
+            persistedState?.themeMode === 'light' &&
+            (persistedState?.navbar?.bgColor === '#0f172a' ||
+              persistedState?.navbar?.textColor === '#f8fafc')
+          ) {
+            persistedState.navbar = {
+              ...persistedState.navbar,
+              bgColor: '#ffffff',
+              textColor: '#0f172a',
+              borderColor: '#e2e8f0',
+            };
+          }
+        }
+        return persistedState;
+      },
     }
   )
 );

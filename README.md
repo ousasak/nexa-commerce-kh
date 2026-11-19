@@ -2,7 +2,7 @@
 
 A complete multi-tenant e-commerce and POS platform where every shop gets its own storefront, merchant dashboard, POS, ABA Pay (KHQR) checkout, PDF invoices, Telegram notifications, and reseller commissions.
 
-Built with **Laravel 13 REST API** (PHP 8.3+) + **React Web Frontends** (Storefront, Admin, Merchant Portal, Reseller, Telegram Mini App) + **Flutter** (Mobile POS & Customer App) + **Python Telegram Bot Worker**, organized as a clean pnpm monorepo.
+Built with **Laravel 13 REST API** (PHP 8.3+) + **React Web Frontends** (Storefront, Admin, Merchant Portal, Reseller, Telegram Mini App) + **Flutter** (Mobile POS & Customer App) + **Laravel 13 Telegram Bot Worker**, organized as a clean pnpm monorepo.
 
 IMPORTANT: This repository is 100% code. All sensitive production secrets have been removed so you can safely clone it, study it, and build your own project. Everything runs locally with localhost defaults and demo seed accounts only.
 
@@ -11,7 +11,7 @@ IMPORTANT: This repository is 100% code. All sensitive production secrets have b
 ## Table of Contents
 
 1. Run Locally
-2. About and Developer
+2. About Project (អំពីគម្រោង)
 3. License and Usage Policy
 4. Security Policy
 5. Features
@@ -40,7 +40,7 @@ IMPORTANT: This repository is 100% code. All sensitive production secrets have b
 | Application | Path | Port / Command |
 |---|---|---|
 | **Backend Core API (Laravel 13)** | `backend/nckhcoreapi` | `make dev-api` or `php artisan serve --port=8000` |
-| **Telegram Bot Worker** | `backend/nckhtelegrambot` | `make dev-bot` (python worker) |
+| **Telegram Bot Worker** | `backend/nckhtelegrambot` | `make dev-bot` (Laravel Telegram worker) |
 | **Customer Storefront** | `webclient/nckhcustomerstorefront` | `make dev-storefront` (port 3000) |
 | **Platform Admin Portal** | `webclient/nckhadminportal` | `make dev-admin` (port 3001) |
 | **Merchant Portal (Dashboard & POS)** | `webclient/nckhmerchantportal` | `make dev-merchant` (port 3002) |
@@ -55,9 +55,50 @@ All accounts shown in this README (admin, demo, and so on) are LOCAL SEED accoun
 
 ---
 
-## 2. About Project
+## 2. About Project (អំពីគម្រោង)
 
-**Nexa Commerce KH** (`nexa-commerce-kh`) is a modern multi-tenant e-commerce, POS, and digital payment platform tailored for retail businesses, multi-store owners, and online storefronts in Cambodia.
+**Nexa Commerce KH** (`nexa-commerce-kh`) គឺជាប្រព័ន្ធ **Multi-tenant E-Commerce, Point-of-Sale (POS) និង Digital Payment Platform** ពេញលេញមួយ ដែលបង្កើតឡើងយ៉ាងផ្ចិតផ្ចង់សម្រាប់អាជីវកម្មលក់រាយ ម្ចាស់ហាងជាច្រើន (Multi-store owners) និងការលក់អនឡាញនៅក្នុងប្រទេសកម្ពុជា។
+
+### 🎯 គោលបំណងចម្បងនៃគម្រោង (Project Vision & Goals)
+គម្រោងនេះត្រូវបានបង្កើតឡើងដើម្បីផ្តល់នូវដំណោះស្រាយពាណិជ្ជកម្មឌីជីថលបែប All-in-One ដែលងាយស្រួល ទំនើប រហ័ស និងមានតម្លៃសមរម្យសម្រាប់ម្ចាស់អាជីវកម្មនៅកម្ពុជា ដោយមិនចាំបាច់សរសេរកូដ ឬចំណាយលើប្រព័ន្ធបរទេសដែលពុំមានការគាំទ្រមុខងារក្នុងស្រុក (ដូចជា KHQR ឬភាសាខ្មែរ)៖
+- **ដំណើរការហាងស្វ័យប្រវត្តិ (Self-serve & Multi-tenancy)**: ម្ចាស់ហាងអាចចុះឈ្មោះបង្កើតហាងដោយខ្លួនឯង ជ្រើសរើស Subscription Plan (Starter សាកល្បងឥតគិតថ្លៃ, Growth, Premium) និងទទួលបានគេហទំព័រលក់ទំនិញផ្ទាល់ខ្លួន (`/:username`) ជាមួយ Theme ពណ៌, Logo, Banner និងស្លាកយីហោរៀងៗខ្លួនភ្លាមៗ។
+- **ការទូទាត់លុយតាមស្តង់ដារកម្ពុជា (ABA Pay KHQR Integration)**: បង្កើតរូបភាព QR កូដ (KHQR) ដោយស្វ័យប្រវត្តិតាមរយៈ ABA PayWay Gateway និងផ្ទៀងផ្ទាត់ការបង់ប្រាក់ភ្លាមៗតាម Webhook ដោយមិនបាច់ឱ្យអតិថិជនផ្ញើស្លីបផ្ទៀងផ្ទាត់ដោយដៃឡើយ។
+- **ប្រព័ន្ធលក់នៅហាងផ្ទាល់ (Omnichannel POS)**: គាំទ្រទាំងការលក់អនឡាញ និងការលក់នៅបញ្ជរក្នុងហាង (In-store Web/Mobile POS) ដោយគណនាប្រាក់ជាពីររូបិយប័ណ្ណ (USD $ / KHR ៛) តាមអត្រាប្តូរប្រាក់ជាក់ស្តែង។
+- **បណ្តាញអេកូឡូស៊ី Telegram ពេញលេញ (Telegram Ecosystem)**: រួមបញ្ចូលទាំង Telegram Bot ឆ្លើយតបអតិថិជន ២៤/៧, លក់ទំនិញលើ **Telegram Mini App** ដោយផ្ទាល់, ផ្ញើដំណឹងការកុម្ម៉ង់/ការបង់ប្រាក់ចូល Telegram Group របស់ហាង, និង Login ដោយប្រើ Telegram OTP។
+- **វិក្កយបត្រផ្លូវការ (Bilingual PDF Invoices & Receipts)**: បង្កើតវិក្កយបត្រ PDF ពីរភាសា (ខ្មែរ និង អង់គ្លេស) ភ្ជាប់ជាមួយ Logo និងពណ៌ Identity របស់ហាង។
+- **ប្រព័ន្ធតំណាងចែកចាយ (Reseller & Commission System)**: អនុញ្ញាតឱ្យ Reseller ជួយផ្សព្វផ្សាយ និងចុះឈ្មោះហាងថ្មីៗ ដោយទទួលបានកម្រៃជើងសារ (Commission) តាមភាគរយជាក់លាក់។
+
+---
+
+### 🧩 សមាសភាគប្រព័ន្ធទាំង ៩ (The 9 Core Sub-systems)
+
+ប្រព័ន្ធ Nexa Commerce KH ដំណើរការដោយការសហការគ្នាយ៉ាងរលូនរវាង Core API, 5 Web Portals, 2 Mobile Apps និង 1 Background Bot Service៖
+
+1. **Backend Core REST API (`backend/nckhcoreapi`) - Port 8000**:
+   - សរសេរដោយ **Laravel 13 (PHP 8.3+)** ផ្តល់នូវ RESTful API រឹងមាំ សុវត្ថិភាពខ្ពស់ សម្រាប់គ្រប់ Platform ទាំងអស់ទាញយកទិន្នន័យ។
+   - គ្រប់គ្រង Authentication (JWT), Multi-tenancy, Catalogs, Orders, ABA KHQR, PDF generation, និង Backup/Restore។
+2. **Telegram Bot Service (`backend/nckhtelegrambot`)**:
+   - សេវាកម្ម Worker បង្កើតឡើងដោយ **Laravel 13** ដំណើរការ Daemon 24/7 (Long-polling & Webhook)។
+   - គ្រប់គ្រង Bot របស់ហាងទាំងអស់៖ ឆ្លើយតប `/start` បង្ហាញព័ត៌មានហាង រួមជាមួយប៊ូតុង **"Open Shop"** ភ្ជាប់ទៅ Mini App, ឆ្លើយតបបញ្ជីមុខទំនិញ `/menu`, តាមដានវិក្កយបត្រ `/order`, និងភ្ជាប់ Chat ទទួលដំណឹងបង់ប្រាក់ `/link`។
+3. **Customer Storefront (`webclient/nckhcustomerstorefront`) - Port 3000**:
+   - គេហទំព័រ Storefront បង្កើតដោយ **React 18 & Tailwind CSS** សម្រាប់អតិថិជនចូលទិញទំនិញតាមរយៈ `/:username`។
+   - មានទំព័រចុះឈ្មោះបង្កើតហាងថ្មី (`/create-shop`) ជាមួយការជ្រើសរើសគម្រោង (Starter ឥតគិតថ្លៃ, Growth, Premium) និងបង់ប្រាក់តាម ABA KHQR។
+4. **Platform Super Admin Portal (`webclient/nckhadminportal`) - Port 3001**:
+   - ផ្ទាំងគ្រប់គ្រងសម្រាប់ម្ចាស់ Platform (Super Admin) ដើម្បីគ្រប់គ្រងហាងទាំងអស់, អនុម័ត/ផ្អាកហាង, កំណត់ថ្លៃ Plan, គ្រប់គ្រង Reseller, មើលផ្ទាំងស្ថិតិ និង Export/Import ប្រព័ន្ធទាំងមូល។
+5. **Merchant Dashboard & POS Portal (`webclient/nckhmerchantportal`) - Port 3002**:
+   - ផ្ទាំងគ្រប់គ្រងសម្រាប់ម្ចាស់ហាង (Merchant) ដើម្បីគ្រប់គ្រងមុខទំនិញ, ប្រភេទ (Categories), បំរែបំរួលទំនិញ (Variants/Attributes), ស្តុកទំនិញ, ការបញ្ជាទិញ, អតិថិជន, និងរបាយការណ៍លក់។
+   - រួមបញ្ចូលទាំងផ្ទាំង **Web Point-of-Sale (POS)** សម្រាប់បុគ្គលិកគិតលុយនៅបញ្ជរ។
+6. **Reseller Portal (`webclient/nckhresellerportal`) - Port 3005**:
+   - ផ្ទាំងគ្រប់គ្រងសម្រាប់ Reseller ពិនិត្យមើល Referral Link, Promo Code, ចំនួនហាងដែលបានចុះឈ្មោះ, ភាគរយ Commission និងប្រាក់កម្រៃជើងសារដែលត្រូវបើក។
+7. **Telegram Mini App (`webclient/nckhtelegramminiapp`) - Port 3006**:
+   - កម្មវិធី WebApp Storefront បង្កើតដោយ **React 18** ដែលដំណើរការយ៉ាងរលូននៅខាងក្នុងកម្មវិធី Telegram ផ្ទាល់។
+   - អតិថិជនអាចមើលរូបភាពទំនិញ, ជ្រើសរើស Size/Color, ដាក់ចូលកន្ត្រក, Auto-login ជាមួយ Telegram account, និងស្កេនទូទាត់ ABA KHQR ដោយមិនបាច់ចាកចេញពី Telegram ឡើយ។
+8. **Mobile Point-of-Sale App (`mobile/nckhposapp`) - Flutter**:
+   - កម្មវិធី Mobile App សម្រាប់បុគ្គលិកគិតលុយតាមទូរស័ព្ទដៃ ឬ Tablet ដំណើរការដោយ **Flutter (iOS/Android)**។
+   - ស្កេន Barcode តាម Camera, គិតប្រាក់លឿនរហ័ស, គណនាប្រាក់ដុល្លារ ($) និងប្រាក់រៀល (៛), និងទូទាត់តាម Bakong KHQR / Cash។
+9. **Mobile Customer App (`mobile/nckhcustomerapp`) - Flutter**:
+   - កម្មវិធី Mobile App សម្រាប់អតិថិជនដើរទិញទំនិញលើទូរស័ព្ទដៃ។
+   - ស្វែងរកហាង, មើលទំនិញតាម Shop Theme Color, Cart, Checkout ជាមួយ ABA KHQR Bottom-sheet, និងទាញយកវិក្កយបត្រ PDF លើ Profile។
 
 ---
 
@@ -99,7 +140,7 @@ This project is designed for development and learning. Before deploying to produ
 - Role-based access control: admin, shop_owner, staff, reseller
 - Failed-login lockout (3 wrong attempts locks for 5 minutes, then escalating)
 - All secrets come from environment variables
-- SQL injection protection (SQLAlchemy ORM)
+- SQL injection protection (Laravel Eloquent ORM & PDO prepared statements)
 - XSS protection (React escapes content)
 - CSRF protection (JWT tokens)
 
@@ -139,7 +180,7 @@ This project is designed for development and learning. Before deploying to produ
 | **PDF** | Barryvdh DomPDF (`barryvdh/laravel-dompdf`) bilingual invoice & receipt generation |
 | **Spreadsheets** | PhpSpreadsheet (`phpoffice/phpspreadsheet`) for Excel import/export |
 | **Telegram Mini App** | React WebApp storefront inside Telegram (`webclient/nckhtelegramminiapp`) |
-| **Bot Worker** | Python 24/7 background polling worker (`backend/nckhtelegrambot`) |
+| **Bot Worker** | Laravel 13 background worker (`backend/nckhtelegrambot`) daemon & webhook |
 | **DevOps** | Docker Compose (PostgreSQL, Redis, Mailpit), Makefile, Root package.json, pnpm |
 
 ---
@@ -759,7 +800,7 @@ make test-api
 
 ABA (PayWay/KHQR) profile ID and secret key are stored per shop in the Payment Settings UI. They are never hard-coded.
 
-### Frontends (Frontend_User/.env.local and similar)
+### Frontends (`webclient/*/.env.local` and similar)
 | Variable | Default | Purpose |
 |---|---|---|
 | REACT_APP_API_URL | http://localhost:8000 | Backend API base URL |
@@ -772,28 +813,34 @@ ABA (PayWay/KHQR) profile ID and secret key are stored per shop in the Payment S
 The app ships with SQLite so you can run it with zero setup. For production, PostgreSQL is recommended.
 
 1. Create the database:
-```
+```sql
 CREATE DATABASE minishop;
 CREATE USER minishop_user WITH PASSWORD 'your-strong-password';
 GRANT ALL PRIVILEGES ON DATABASE minishop TO minishop_user;
 ```
-2. Set DATABASE_URL in .env:
+2. Configure `.env` in `backend/nckhcoreapi`:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=minishop
+DB_USERNAME=minishop_user
+DB_PASSWORD=your-strong-password
 ```
-DATABASE_URL=postgresql://minishop_user:your-strong-password@localhost:5432/minishop
+3. Run migrations and database seeds:
+```bash
+php artisan migrate --force
+php artisan db:seed
 ```
-3. Install the PostgreSQL driver:
-```
-pip install psycopg2-binary
-```
-4. Restart the backend:
-```
-uvicorn main:app --reload --port 8000
+4. Restart the backend API:
+```bash
+php artisan serve --port=8000
 ```
 
 ---
 ## 15. Complete API Reference
 
-All endpoints are grouped by area. When the backend is running, the interactive docs are at http://localhost:8000/docs
+All endpoints are grouped by area. API routes are declared in `backend/nckhcoreapi/routes/api.php` under the `/api` prefix.
 
 Access legend: Public = anyone; User = any logged-in user; Admin = platform admin; Owner = shop owner/staff; Reseller = reseller account.
 
@@ -947,7 +994,7 @@ Payments and PDFs:
 The project is a solid foundation, not a finished product. Good next steps:
 
 - Dockerize everything with a single docker-compose file for backend, PostgreSQL, and the frontends.
-- Add automated tests (pytest for the API, Jest/React Testing Library for the React apps).
+- Add automated tests (PHPUnit / Pest for the Laravel Core API & Bot Service, Jest/React Testing Library for the React apps).
 - Add a search engine such as Elasticsearch or Meilisearch for instant product search.
 - Add live chat and notifications with WebSockets or Server-Sent Events.
 - Expand multi-currency and i18n translation files beyond Khmer and English.

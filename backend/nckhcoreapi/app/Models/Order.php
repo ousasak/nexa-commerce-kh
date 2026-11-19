@@ -31,6 +31,9 @@ class Order extends Model
         'transaction_id',
         'payment_detail',
         'order_status',
+        'order_type',
+        'table_number',
+        'covers',
         'receipt_url',
         'paid_at',
     ];
@@ -40,12 +43,43 @@ class Order extends Model
         return [
             'shop_id' => 'integer',
             'customer_id' => 'integer',
+            'covers' => 'integer',
             'items_total' => 'float',
             'shipping_fee' => 'float',
             'discount' => 'float',
             'total' => 'float',
             'paid_at' => 'datetime',
         ];
+    }
+
+    public function setReceiptUrlAttribute($value): void
+    {
+        $this->attributes['receipt_url'] = $value ?? '';
+    }
+
+    public function setTransactionIdAttribute($value): void
+    {
+        $this->attributes['transaction_id'] = $value ?? '';
+    }
+
+    public function setCustomerNameAttribute($value): void
+    {
+        $this->attributes['customer_name'] = $value ?? '';
+    }
+
+    public function setCustomerPhoneAttribute($value): void
+    {
+        $this->attributes['customer_phone'] = $value ?? '';
+    }
+
+    public function setCustomerEmailAttribute($value): void
+    {
+        $this->attributes['customer_email'] = $value ?? '';
+    }
+
+    public function setCustomerAddressAttribute($value): void
+    {
+        $this->attributes['customer_address'] = $value ?? '';
     }
 
     public function shop()
@@ -87,6 +121,9 @@ class Order extends Model
             'payment_status' => $this->payment_status ?? 'pending',
             'transaction_id' => $this->transaction_id ?? '',
             'order_status' => $this->order_status ?? 'pending',
+            'order_type' => $this->order_type ?? 'dine-in',
+            'table_number' => $this->table_number,
+            'covers' => $this->covers,
             'receipt_url' => $this->receipt_url ?? '',
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'paid_at' => $this->paid_at ? $this->paid_at->toIso8601String() : null,

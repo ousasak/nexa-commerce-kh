@@ -330,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   style={{
                     color: 'color-mix(in srgb, var(--sidebar-text, #94a3b8) 60%, transparent)',
                   }}
-                  className="px-3 pt-2 pb-1 text-[10.5px] font-semibold uppercase tracking-wider select-none"
+                  className="px-3.5 pt-3 pb-1 text-[11.5px] font-bold uppercase tracking-wider select-none"
                 >
                   {t(group.groupKey, group.groupLabel)}
                 </p>
@@ -365,8 +365,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           }
                     }
                     className={({ isActive }) =>
-                      `flex items-center rounded-xl text-[13px] font-medium transition-all select-none outline-none group relative focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] ${
-                        collapsed ? 'justify-center size-10 mx-auto' : 'gap-3 px-3 py-2'
+                      `flex items-center rounded-xl text-sm font-medium transition-all select-none outline-none group relative focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] ${
+                        collapsed ? 'justify-center size-10 mx-auto' : 'gap-3 px-3.5 py-2.5'
                       } ${
                         isActive
                           ? 'font-semibold shadow-2xs'
@@ -436,7 +436,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   borderColor:
                                     'color-mix(in srgb, var(--sidebar-active-bg, var(--primary-hex, #ec4899)) 35%, transparent)',
                                 }}
-                                className="ml-auto border text-[10.5px] font-semibold px-2 py-0.5 rounded-full leading-none shrink-0 font-mono"
+                                className="ml-auto border text-xs font-bold px-2.5 py-0.5 rounded-full leading-none shrink-0 font-mono"
                               >
                                 {badgeText}
                               </span>
@@ -519,10 +519,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       href={storefrontUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-[#8ea39f] hover:text-white hover:bg-white/[0.05] transition-colors select-none group"
+                      className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#8ea39f] hover:text-white hover:bg-white/[0.05] transition-colors select-none group"
                     >
                       <span className="truncate">{t('nav.storefront', 'Storefront')}</span>
-                      <ExternalLink className="size-3.5 text-[#678b86] group-hover:text-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-colors" />
+                      <ExternalLink className="size-4 text-[#678b86] group-hover:text-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-colors" />
                     </a>
                   )}
                 </>
@@ -550,7 +550,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     boxShadow:
                       '0 4px 12px color-mix(in srgb, var(--sidebar-active-bg, var(--primary-hex, #ec4899)) 30%, transparent)',
                   }}
-                  className="size-9 rounded-full text-white font-bold text-xs flex items-center justify-center mx-auto cursor-pointer hover:ring-2 hover:ring-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-all"
+                  className="size-10 rounded-full text-white font-bold text-sm flex items-center justify-center mx-auto cursor-pointer hover:ring-2 hover:ring-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-all"
                 >
                   {userInitials}
                 </div>
@@ -574,13 +574,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <div className="flex items-center justify-between gap-2.5 p-1.5 rounded-xl hover:bg-white/[0.04] transition-colors">
+            <div className="flex items-center justify-between gap-3 p-1.5 rounded-xl hover:bg-white/[0.04] transition-colors">
               <div
                 onClick={() => {
                   navigate('/profile');
                   handleNavClick();
                 }}
-                className="min-w-0 flex items-center gap-2.5 flex-1 cursor-pointer group transition-all select-none"
+                className="min-w-0 flex items-center gap-3 flex-1 cursor-pointer group transition-all select-none"
                 title={t('nav.viewProfile', 'Show Profile')}
               >
                 <div
@@ -590,15 +590,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     borderColor:
                       'color-mix(in srgb, var(--sidebar-active-bg, var(--primary-hex, #ec4899)) 40%, transparent)',
                   }}
-                  className="size-8 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm border"
+                  className="size-9 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm border"
                 >
                   {userInitials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-white truncate group-hover:text-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-colors">
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-[var(--sidebar-active-bg,var(--primary-hex,#ec4899))] transition-colors">
                     {userDisplayName}
                   </p>
-                  <p className="text-[11px] text-[#678b86] uppercase font-medium truncate">
+                  <p className="text-xs text-[#678b86] uppercase font-medium truncate">
                     {userRole} • Store
                   </p>
                 </div>
@@ -607,11 +607,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={handleLogout}
-                className="size-7 rounded-lg text-[#8ea39f] hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+                className="size-8 rounded-lg text-[#8ea39f] hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
                 title={t('auth.logout', 'Logout')}
                 aria-label={t('auth.logout', 'Logout')}
               >
-                <LogOut className="size-3.5" />
+                <LogOut className="size-4" />
               </button>
             </div>
           )}

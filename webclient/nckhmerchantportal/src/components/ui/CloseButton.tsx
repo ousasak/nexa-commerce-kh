@@ -21,15 +21,15 @@ export interface CloseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonE
 const sizeStyles: Record<CloseButtonSize, { button: string; icon: number }> = {
   sm: {
     button: 'w-7 h-7 min-w-[28px] min-h-[28px]',
-    icon: 14,
+    icon: 13,
   },
   md: {
-    button: 'w-[34px] h-[34px] min-w-[34px] min-h-[34px]',
-    icon: 16,
+    button: 'w-[30px] h-[30px] min-w-[30px] min-h-[30px]',
+    icon: 15,
   },
   lg: {
-    button: 'w-[38px] h-[38px] min-w-[38px] min-h-[38px]',
-    icon: 18,
+    button: 'w-[36px] h-[36px] min-w-[36px] min-h-[36px]',
+    icon: 17,
   },
 }
 

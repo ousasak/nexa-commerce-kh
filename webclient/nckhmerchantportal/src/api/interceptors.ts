@@ -3,12 +3,26 @@ import { storage } from '../utils/storage';
 import { normalizeAxiosError, AppApiError } from '../utils/errorHandler';
 
 export function setupInterceptors(api: AxiosInstance): void {
-  // Attach authorization token to outgoing requests
+  // Attach authorization token and locale to outgoing requests
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = storage.getToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      const lang =
+        (typeof localStorage !== 'undefined'
+          ? localStorage.getItem('merchant_language') || localStorage.getItem('i18nextLng')
+          : 'kh') || 'kh';
+      if (lang && config.headers) {
+        config.headers['Accept-Language'] = lang;
+      }
+      // If payload is FormData, remove application/json Content-Type so browser sets boundary multipart/form-data
+      if (config.data instanceof FormData && config.headers) {
+        delete config.headers['Content-Type'];
+        if (typeof config.headers.delete === 'function') {
+          config.headers.delete('Content-Type');
+        }
       }
       return config;
     },

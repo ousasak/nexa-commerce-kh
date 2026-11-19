@@ -139,21 +139,21 @@ export const CustomerReportTable: React.FC<CustomerReportTableProps> = ({
                     {isDiamond ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/40">
                         <Sparkles className="size-3 text-purple-500" />
-                        <span>Diamond</span>
+                        <span>{t('reports.tierDiamond', 'Diamond')}</span>
                       </span>
                     ) : isGold ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40">
                         <Crown className="size-3 text-amber-500" />
-                        <span>Gold</span>
+                        <span>{t('reports.tierGold', 'Gold')}</span>
                       </span>
                     ) : isSilver ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/60 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/40">
                         <Award className="size-3 text-sky-500" />
-                        <span>Silver</span>
+                        <span>{t('reports.tierSilver', 'Silver')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                        <span>Regular</span>
+                        <span>{t('reports.tierRegular', 'Regular')}</span>
                       </span>
                     )}
                   </TableCell>

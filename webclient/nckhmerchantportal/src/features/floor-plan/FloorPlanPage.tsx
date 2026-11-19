@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { PlusCircle, Settings2, ChevronDown } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, Settings2, ChevronDown, RefreshCw } from 'lucide-react';
 import { useRestaurantStore } from '../../stores/restaurantStore';
-import { RestaurantTable, TableSection, TableStatus, Reservation } from '../../types/restaurant';
+import { RestaurantTable, TableStatus, Reservation } from '../../types/restaurant';
 import { FloorPlanTableCard } from './FloorPlanTableCard';
 import { TableDetailsModal } from './TableDetailsModal';
 import { TableSettingsDrawer } from './TableSettingsDrawer';
 import { UpcomingReservationsSection } from './UpcomingReservationsSection';
-import { EditReservationDrawer } from '../reservations/EditReservationDrawer';
+import { ReservationModal } from '../reservations/ReservationModal';
 import { RestroDatePickerPopover } from './RestroDatePickerPopover';
 import { useLanguage } from '../../i18n';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -20,7 +20,15 @@ const STATUS_OPTIONS: { value: string; label: string; dot?: string }[] = [
 ];
 
 export const FloorPlanPage: React.FC = () => {
-  const { tables, selectedDate, setSelectedDate } = useRestaurantStore();
+  const {
+    tables,
+    reservations,
+    selectedDate,
+    setSelectedDate,
+    fetchTables,
+    fetchReservations,
+    isLoadingTables,
+  } = useRestaurantStore();
   const { t } = useLanguage();
 
   const [selectedSection, setSelectedSection] = useState<string>('all');
@@ -30,6 +38,19 @@ export const FloorPlanPage: React.FC = () => {
   const [reservationDrawerOpen, setReservationDrawerOpen] = useState(false);
   const [reservationToEdit, setReservationToEdit] = useState<Reservation | null>(null);
   const [preselectedTableNum, setPreselectedTableNum] = useState<number | undefined>(undefined);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Initial load from backend API
+  useEffect(() => {
+    fetchTables();
+    fetchReservations();
+  }, [fetchTables, fetchReservations]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.allSettled([fetchTables(), fetchReservations()]);
+    setIsRefreshing(false);
+  };
 
   const sections: { id: string; label: string }[] = [
     { id: 'all', label: 'All' },
@@ -38,52 +59,30 @@ export const FloorPlanPage: React.FC = () => {
     { id: 'Outdoor', label: 'Outdoor' },
   ];
 
-  // Map and filter tables based on selectedDate and filters
+  // Map and filter tables dynamically based on selectedDate and filters
   const filteredTables = useMemo(() => {
     return tables
       .map((table) => {
-        // If date is Oct 3, 2026, match the official RestroPOS layout exactly
-        if (selectedDate === '2026-10-03') {
-          if (table.number === 2) {
-            return {
-              ...table,
-              status: 'reserved' as TableStatus,
-              reservedFor: 'Emily Ashford',
-              reservationTime: '12:30 · 2 guests',
-            };
-          }
-          if (table.number === 4) {
-            return {
-              ...table,
-              status: 'occupied' as TableStatus,
-              reservedFor: undefined,
-              reservationTime: undefined,
-            };
-          }
-          if (table.number === 11) {
-            return {
-              ...table,
-              status: 'occupied' as TableStatus,
-              reservedFor: undefined,
-              reservationTime: undefined,
-            };
-          }
-          if (table.number === 12) {
-            return {
-              ...table,
-              status: 'reserved' as TableStatus,
-              reservedFor: 'George Pemberton',
-              reservationTime: '19:00 · 12 guests',
-            };
-          }
+        // Look up reservation matching this table on selectedDate
+        const matchingRes = reservations.find(
+          (r) =>
+            (r.tableId === table.id ||
+              r.tableId === `Table ${table.number}` ||
+              r.tableId?.toLowerCase() === `t-${String(table.number).padStart(2, '0')}`.toLowerCase() ||
+              (r as any).tableDbId === (table as any).db_id) &&
+            r.date === selectedDate &&
+            (r.status === 'upcoming' || r.status === 'seated')
+        );
+
+        if (matchingRes) {
           return {
             ...table,
-            status: 'available' as TableStatus,
-            reservedFor: undefined,
-            reservationTime: undefined,
-            currentOrderId: undefined,
+            status: (matchingRes.status === 'seated' ? 'occupied' : 'reserved') as TableStatus,
+            reservedFor: matchingRes.guestName,
+            reservationTime: `${matchingRes.time} · ${matchingRes.partySize} guests`,
           };
         }
+
         return table;
       })
       .filter((table) => {
@@ -91,7 +90,7 @@ export const FloorPlanPage: React.FC = () => {
         const matchStatus = selectedStatus === 'all' || table.status === selectedStatus;
         return matchSection && matchStatus;
       });
-  }, [tables, selectedSection, selectedStatus, selectedDate]);
+  }, [tables, reservations, selectedSection, selectedStatus, selectedDate]);
 
   const handleOpenNewReservation = (tableNum?: number) => {
     setReservationToEdit(null);
@@ -107,49 +106,66 @@ export const FloorPlanPage: React.FC = () => {
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       <Breadcrumbs />
-      {/* Top Header Row matching RestroPOS */}
+      {/* Top Header Row matching System Standard */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
-          Tables
-        </h1>
+        <div className="flex items-center gap-2.5">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+              {t('restaurant.tables', 'Tables')}
+            </h1>
+            <p className="text-xs text-slate-500">
+              {t('restaurant.floorPlanSubtitle', 'Floor plan & real-time table status')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            title={t('restaurant.refreshFloorPlan', 'Refresh floor plan')}
+            disabled={isRefreshing || isLoadingTables}
+            className="size-9 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer shadow-2xs active:scale-95"
+          >
+            <RefreshCw className={`size-4 ${isRefreshing || isLoadingTables ? 'animate-spin text-pink-500' : ''}`} />
+          </button>
+        </div>
 
         <div className="flex items-center gap-2">
           {/* Date Picker Button Popover */}
           <RestroDatePickerPopover
             selectedDate={selectedDate}
             onChange={setSelectedDate}
+            className="h-10 sm:h-10.5 px-3.5 sm:px-4 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 shadow-2xs transition-all cursor-pointer active:scale-95"
           />
 
-          {/* New Reservation Button (Orange with PlusCircle) */}
+          {/* New Reservation Button (Primary matching System Standard) */}
           <button
             type="button"
             onClick={() => handleOpenNewReservation()}
             style={{
               backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
             }}
-            className="h-9 px-4 rounded-full hover:brightness-90 text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-[0.98]"
+            className="h-10 sm:h-10.5 px-4.5 rounded-xl hover:brightness-90 text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer hover:shadow active:scale-[0.98]"
           >
-            <PlusCircle className="size-4" />
-            <span>New Reservation</span>
+            <Plus className="size-4 stroke-[2.5]" />
+            <span>{t('restaurant.newReservation', 'New Reservation')}</span>
           </button>
 
           {/* Table Settings Button */}
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            aria-label="Table Settings"
-            title="Table Settings"
-            className="size-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+            aria-label={t('restaurant.tableSettings', 'Table Settings')}
+            title={t('restaurant.tableSettings', 'Table Settings')}
+            className="size-10 sm:size-10.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
           >
-            <Settings2 className="size-4" />
+            <Settings2 className="size-4.5" />
           </button>
         </div>
       </div>
 
-      {/* Filter Row: Section pills on left, Status dropdown on right */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Filter Row: Section tabs on left, Status dropdown on right */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 sm:p-3 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
         {/* Section Tabs */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {sections.map(({ id, label }) => {
             const isActive = selectedSection === id;
             return (
@@ -165,10 +181,10 @@ export const FloorPlanPage: React.FC = () => {
                       }
                     : undefined
                 }
-                className={`h-7 px-4 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'text-white shadow-2xs font-semibold'
-                    : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? 'text-white shadow-2xs font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
                 }`}
               >
                 {label}
@@ -182,7 +198,7 @@ export const FloorPlanPage: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 appearance-none cursor-pointer"
+            className="h-9.5 pl-3.5 pr-8 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer shadow-2xs transition-all"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -232,8 +248,8 @@ export const FloorPlanPage: React.FC = () => {
         onClose={() => setIsSettingsOpen(false)}
       />
 
-      {/* Unified Reservation Drawer (New & Edit) */}
-      <EditReservationDrawer
+      {/* Unified Reservation Modal (New & Edit) */}
+      <ReservationModal
         reservation={reservationToEdit}
         isOpen={reservationDrawerOpen}
         onClose={() => {

@@ -11,13 +11,32 @@ Route::get('/', function () {
     ]);
 });
 
+Route::options('/uploads/{path}', function () {
+    return response('', 204, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+        'Access-Control-Allow-Headers' => '*',
+    ]);
+})->where('path', '.*');
+
 Route::get('/uploads/{path}', function ($path) {
     $full = public_path("uploads/{$path}");
     if (! File::exists($full)) {
         abort(404);
     }
 
-    return response()->file($full);
+    return response()->file($full, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+    ]);
+})->where('path', '.*');
+
+Route::options('/backups/{path}', function () {
+    return response('', 204, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+        'Access-Control-Allow-Headers' => '*',
+    ]);
 })->where('path', '.*');
 
 Route::get('/backups/{path}', function ($path) {
@@ -26,5 +45,8 @@ Route::get('/backups/{path}', function ($path) {
         abort(404);
     }
 
-    return response()->file($full);
+    return response()->file($full, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+    ]);
 })->where('path', '.*');

@@ -15,3 +15,5 @@ export * from './ToastContainer';
 export * from './DropdownMenu';
 export * from './DataTableViewOptions';
 export * from './Breadcrumbs';
+export * from './DeleteConfirmDialog';
+export * from './GlobalPrintDocument';

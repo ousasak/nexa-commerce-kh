@@ -33,7 +33,8 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(\App\Actions\Telegram\HandleStartAction::class),
                 $app->make(\App\Actions\Telegram\HandleMenuAction::class),
                 $app->make(\App\Actions\Telegram\HandleOrderAction::class),
-                $app->make(\App\Actions\Telegram\HandlePaymentAction::class)
+                $app->make(\App\Actions\Telegram\HandlePaymentAction::class),
+                $app->make(\App\Actions\Telegram\HandleReportAction::class)
             );
         });
     }

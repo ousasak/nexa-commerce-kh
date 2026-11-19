@@ -5,6 +5,8 @@ import { Popover, PopoverTrigger, PopoverContent } from '../../components/ui/pop
 interface RestroDatePickerPopoverProps {
   selectedDate: string; // 'YYYY-MM-DD'
   onChange: (date: string) => void;
+  className?: string;
+  isActive?: boolean;
 }
 
 const MONTH_NAMES = [
@@ -27,6 +29,8 @@ const WEEKDAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 export const RestroDatePickerPopover: React.FC<RestroDatePickerPopoverProps> = ({
   selectedDate,
   onChange,
+  className,
+  isActive,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -162,9 +166,16 @@ export const RestroDatePickerPopover: React.FC<RestroDatePickerPopoverProps> = (
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="h-8 px-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+          className={
+            className ||
+            `h-10 sm:h-10.5 px-3.5 sm:px-4 rounded-xl border text-sm font-semibold flex items-center gap-2 shadow-2xs transition-all cursor-pointer active:scale-95 ${
+              isActive
+                ? 'border-primary bg-primary text-white shadow-xs'
+                : 'border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
+            }`
+          }
         >
-          <CalendarIcon className="size-3.5 text-slate-500" />
+          <CalendarIcon className={`size-3.5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
           <span>{formattedButtonLabel}</span>
         </button>
       </PopoverTrigger>

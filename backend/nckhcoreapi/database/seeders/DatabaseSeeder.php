@@ -82,7 +82,8 @@ class DatabaseSeeder extends Seeder
             // Demo owner account
             User::create([
                 'username' => 'demo',
-                'email' => 'demo@ministorekh.com',
+                'email' => 'hjhfg7226@gmail.com',
+                'google_email' => 'hjhfg7226@gmail.com',
                 'password' => Hash::make('demo123'),
                 'role' => 'shop_owner',
                 'shop_id' => $demoShop->id,

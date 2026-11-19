@@ -32,10 +32,52 @@ class ReportController extends Controller
         $days = (int) $request->input('days', 30);
         $since = Carbon::now()->subDays($days);
 
-        $orders = Order::where('shop_id', $shopId)
+        $query = Order::where('shop_id', $shopId)
             ->where('created_at', '>=', $since)
-            ->where('payment_status', 'paid')
-            ->get();
+            ->where('payment_status', 'paid');
+
+        if ($request->filled('channel') && $request->input('channel') !== 'all') {
+            $ch = strtolower($request->input('channel'));
+            if ($ch === 'pos') {
+                $query->where(function($q) {
+                    $q->where('order_number', 'LIKE', 'POS%')
+                      ->orWhere('channel', 'pos');
+                });
+            } elseif ($ch === 'telegram') {
+                $query->where(function($q) {
+                    $q->whereNotNull('customer_telegram')
+                      ->orWhere('channel', 'telegram');
+                });
+            } elseif ($ch === 'storefront') {
+                $query->where(function($q) {
+                    $q->where('order_number', 'NOT LIKE', 'POS%')
+                      ->whereNull('customer_telegram');
+                });
+            }
+        }
+
+        if ($request->filled('payment_method') && $request->input('payment_method') !== 'all') {
+            $pm = strtolower($request->input('payment_method'));
+            if ($pm === 'khqr') {
+                $query->where(function($q) {
+                    $q->where('payment_method', 'LIKE', '%khqr%')
+                      ->orWhere('payment_method', 'LIKE', '%bakong%')
+                      ->orWhere('payment_method', 'LIKE', '%qr%');
+                });
+            } elseif ($pm === 'cash') {
+                $query->where(function($q) {
+                    $q->where('payment_method', 'LIKE', '%cash%')
+                      ->orWhere('payment_method', 'LIKE', '%cod%');
+                });
+            } elseif ($pm === 'card' || $pm === 'aba') {
+                $query->where(function($q) {
+                    $q->where('payment_method', 'LIKE', '%aba%')
+                      ->orWhere('payment_method', 'LIKE', '%card%');
+                });
+            }
+        }
+
+        $orders = $query->get();
 
         $buckets = [];
         foreach ($orders as $o) {

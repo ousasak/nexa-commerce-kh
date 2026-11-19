@@ -16,13 +16,6 @@ interface TableDetailsModalProps {
 
 const TABLE_STATUS_LIST: TableStatus[] = ['available', 'occupied', 'reserved', 'cleaning'];
 
-const TABLE_STATUS_LABELS: Record<TableStatus, string> = {
-  available: 'Available',
-  occupied: 'Occupied',
-  reserved: 'Reserved',
-  cleaning: 'Cleaning',
-};
-
 const TABLE_STATUS_STYLES: Record<TableStatus, string> = {
   available: 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
   occupied: 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400',
@@ -51,6 +44,20 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
 }) => {
   const { reservations, updateTableStatus, updateReservation } = useRestaurantStore();
   const { t } = useLanguage();
+
+  const tableStatusLabels: Record<TableStatus, string> = {
+    available: t('restaurant.statusAvailable', 'Available'),
+    occupied: t('restaurant.statusOccupied', 'Occupied'),
+    reserved: t('restaurant.statusReserved', 'Reserved'),
+    cleaning: t('restaurant.statusCleaning', 'Cleaning'),
+  };
+
+  const reservationStatusLabels: Record<string, string> = {
+    upcoming: t('restaurant.statusUpcoming', 'Upcoming'),
+    seated: t('restaurant.statusSeated', 'Seated'),
+    completed: t('restaurant.statusCompleted', 'Completed'),
+    cancelled: t('restaurant.statusCancelled', 'Cancelled'),
+  };
 
   const [status, setStatus] = useState<TableStatus>('available');
   const [reservedFor, setReservedFor] = useState('');
@@ -142,7 +149,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="size-3" />
-                    {activeReservation.partySize} guests
+                    {activeReservation.partySize} {t('restaurant.guestsUnit', 'guests')}
                   </span>
                 </div>
               </div>
@@ -154,7 +161,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
                     : 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300'
                 }`}
               >
-                {activeReservation.status}
+                {reservationStatusLabels[activeReservation.status] || activeReservation.status}
               </span>
             </div>
 
@@ -166,7 +173,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
                   onClick={handleSeatGuest}
                   className="px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
                 >
-                  Seat Guests
+                  {t('restaurant.markSeated', 'Seat Guests')}
                 </button>
               )}
               {onEditReservation && (
@@ -178,7 +185,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
                   }}
                   className="px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                 >
-                  Edit Booking
+                  {t('restaurant.editReservation', 'Edit Booking')}
                 </button>
               )}
             </div>
@@ -202,7 +209,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
-                {TABLE_STATUS_LABELS[s]}
+                {tableStatusLabels[s] || s}
               </button>
             ))}
           </div>
@@ -212,7 +219,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
             <div className="space-y-2 pt-1">
               <div>
                 <label htmlFor="reserved-for" className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                  Guest Name
+                  {t('restaurant.guestName', 'Guest Name')}
                 </label>
                 <input
                   id="reserved-for"
@@ -225,7 +232,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
               </div>
               <div>
                 <label htmlFor="reservation-time" className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                  Reservation Time
+                  {t('restaurant.time', 'Reservation Time')}
                 </label>
                 <input
                   id="reservation-time"
@@ -243,7 +250,7 @@ export const TableDetailsModal: React.FC<TableDetailsModalProps> = ({
           {status === 'occupied' && (
             <div className="space-y-1.5 pt-1">
               <label htmlFor="order-id" className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                Order ID (optional)
+                {t('restaurant.orderIdOptional', 'Order ID (optional)')}
               </label>
               <input
                 id="order-id"

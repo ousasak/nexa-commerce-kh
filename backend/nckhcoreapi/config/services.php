@@ -41,4 +41,9 @@ return [
         'expire_minutes' => (int) env('JWT_EXPIRE_MINUTES', 10080),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+    ],
+
 ];

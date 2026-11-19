@@ -245,10 +245,19 @@ export default function BackupPage() {
 
   const isKhmer = i18n.language === 'kh';
 
+  const latestBackup = useMemo(() => {
+    if (!history || history.length === 0) return null;
+    return [...history].sort((a, b) => {
+      const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return db - da;
+    })[0];
+  }, [history]);
+
   if (loading && history.length === 0) return <Loading />;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-16 px-2 sm:px-4">
+    <div className="w-full space-y-6 pb-16">
       {/* Top Breadcrumb & Page Header */}
       <div className="space-y-2">
         <Breadcrumbs />
@@ -269,154 +278,155 @@ export default function BackupPage() {
         </div>
       </div>
 
-      {/* 3 Core Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Card 1: Full ZIP Backup */}
-        <Card className="relative flex flex-col justify-between border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel rounded-2xl hover:border-primary/40 transition-all">
-          <CardHeader className="p-5 sm:p-6 pb-4">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="w-11 h-11 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                <Archive className="w-5 h-5" />
+      {/* ─── Clean 2-Section Action Hub ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        {/* Left: Backup & Export Hub (7 cols) */}
+        <Card className="lg:col-span-7 relative overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm rounded-2xl flex flex-col justify-between">
+          <div className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <Archive className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>{t('backup.cards.zipTitle', 'Full System Backup')}</span>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-bold bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400"
+                    >
+                      ZIP & XLSX
+                    </Badge>
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {t(
+                      'backup.subtitle',
+                      'Create full snapshots of your products, orders, categories, customers, and shop settings.'
+                    )}
+                  </p>
+                </div>
               </div>
-              <Badge
-                variant="outline"
-                className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 text-[11px] font-bold"
-              >
-                {t('backup.cards.zipBadge', 'Recommended')}
-              </Badge>
             </div>
-            <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t('backup.cards.zipTitle', 'Full System Backup')}
-            </CardTitle>
-            <div className="text-[11px] font-mono font-semibold text-primary">
-              {t('backup.cards.zipFormat', '.ZIP Archive')}
-            </div>
-            <CardDescription className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
-              {t(
-                'backup.cards.zipDesc',
-                'Complete shop snapshot including all products, high-res images, categories, orders, and customer records in a portable ZIP file.'
-              )}
-            </CardDescription>
-          </CardHeader>
 
-          <CardFooter className="p-5 sm:p-6 pt-0">
-            <Button
-              onClick={createZipBackup}
-              disabled={creating}
-              className="w-full h-10 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold shadow-xs transition-all"
-            >
-              {creating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t('backup.cards.zipCreating', 'Creating Backup...')}
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4 mr-1.5" />
-                  {t('backup.cards.zipBtn', 'Create ZIP Backup')}
-                </>
-              )}
-            </Button>
-          </CardFooter>
+            {/* Quick Status Bar */}
+            <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 text-xs">
+              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <span className="text-slate-400">{t('backup.latestBackup', 'Last Backup:')}</span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {latestBackup?.created_at
+                    ? new Date(latestBackup.created_at).toLocaleString(
+                        isKhmer ? 'km-KH' : 'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }
+                      )
+                    : t('backup.noBackupYet', 'None yet')}
+                </span>
+              </div>
+              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
+              <div className="flex items-center gap-1 text-slate-500">
+                <span>{t('backup.totalFiles', 'Total {{count}} files', { count: history.length })}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Button
+                onClick={createZipBackup}
+                disabled={creating}
+                className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-xs gap-2"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    <span>{t('backup.cards.zipCreating', 'Creating Backup...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>{t('backup.cards.zipBtn', 'Create ZIP Backup')}</span>
+                  </>
+                )}
+              </Button>
+
+              <Button
+                onClick={exportExcel}
+                disabled={exporting}
+                variant="outline"
+                className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold gap-2"
+              >
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin text-emerald-600" />
+                    <span>{t('backup.cards.excelExporting', 'Exporting...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>{t('backup.cards.excelBtn', 'Export to Excel')}</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </Card>
 
-        {/* Card 2: Excel Export */}
-        <Card className="relative flex flex-col justify-between border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel rounded-2xl hover:border-emerald-500/40 transition-all">
-          <CardHeader className="p-5 sm:p-6 pb-4">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <FileSpreadsheet className="w-5 h-5" />
+        {/* Right: Restore & Import Card (5 cols) */}
+        <Card className="lg:col-span-5 relative overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm rounded-2xl flex flex-col justify-between">
+          <div className="p-5 sm:p-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {t('backup.cards.importTitle', 'Restore & Import Data')}
+                </h3>
               </div>
               <Badge
                 variant="outline"
-                className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 text-[11px] font-bold"
-              >
-                {t('backup.cards.excelFormat', '.XLSX Spreadsheet')}
-              </Badge>
-            </div>
-            <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t('backup.cards.excelTitle', 'Excel Spreadsheet Export')}
-            </CardTitle>
-            <div className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-              Microsoft Excel
-            </div>
-            <CardDescription className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
-              {t(
-                'backup.cards.excelDesc',
-                'Export clean spreadsheet tables of your store catalog and customer orders for accounting, inventory auditing, or manual review.'
-              )}
-            </CardDescription>
-          </CardHeader>
-
-          <CardFooter className="p-5 sm:p-6 pt-0">
-            <Button
-              onClick={exportExcel}
-              disabled={exporting}
-              variant="outline"
-              className="w-full h-10 rounded-xl font-bold border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-all"
-            >
-              {exporting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t('backup.cards.excelExporting', 'Exporting...')}
-                </>
-              ) : (
-                <>
-                  <FileSpreadsheet className="w-4 h-4 mr-1.5" />
-                  {t('backup.cards.excelBtn', 'Export to Excel')}
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Card 3: Restore / Import */}
-        <Card className="relative flex flex-col justify-between border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-panel rounded-2xl hover:border-sky-500/40 transition-all">
-          <CardHeader className="p-5 sm:p-6 pb-4">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                <Upload className="w-5 h-5" />
-              </div>
-              <Badge
-                variant="outline"
-                className="bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 text-[11px] font-bold"
+                className="text-[10px] font-semibold bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-400"
               >
                 .ZIP / .XLSX
               </Badge>
             </div>
-            <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t('backup.cards.importTitle', 'Restore & Import Data')}
-            </CardTitle>
-            <div className="text-[11px] font-mono font-semibold text-sky-600 dark:text-sky-400">
-              {t('backup.cards.importFormat', 'Supports .ZIP, .XLSX, .JSON')}
+
+            {/* Interactive Drop / Upload Area */}
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="group cursor-pointer rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-sky-500/60 dark:hover:border-sky-500/60 bg-slate-50/50 dark:bg-slate-800/30 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 p-4 transition-all text-center flex flex-col items-center justify-center space-y-1.5"
+            >
+              <div className="w-9 h-9 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                {importing ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {importing
+                    ? t('backup.cards.importing', 'Restoring Data...')
+                    : t('backup.cards.importBtn', 'Select File to Restore')}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {t('backup.cards.importFormat', 'Supports .ZIP, .XLSX, .JSON')}
+                </p>
+              </div>
             </div>
-            <CardDescription className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
+
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
               {t(
                 'backup.cards.importDesc',
                 'Restore your store data from a previously created ZIP or Excel backup file. Existing records are safely preserved.'
               )}
-            </CardDescription>
-          </CardHeader>
+            </p>
 
-          <CardFooter className="p-5 sm:p-6 pt-0">
-            <Button
-              onClick={() => fileRef.current?.click()}
-              disabled={importing}
-              variant="outline"
-              className="w-full h-10 rounded-xl font-bold border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-all"
-            >
-              {importing ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-primary" />
-                  {t('backup.cards.importing', 'Restoring Data...')}
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4 mr-1.5 text-slate-500" />
-                  {t('backup.cards.importBtn', 'Select File to Restore')}
-                </>
-              )}
-            </Button>
             <input
               ref={fileRef}
               type="file"
@@ -424,7 +434,7 @@ export default function BackupPage() {
               className="hidden"
               onChange={handleImport}
             />
-          </CardFooter>
+          </div>
         </Card>
       </div>
 
@@ -526,7 +536,7 @@ export default function BackupPage() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-slate-50/60 dark:bg-slate-800/40">
-              <TableRow className="border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold text-slate-400">
+              <TableRow className="border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <TableHead
                   onClick={() => {
                     if (sortField === 'index') setSortAsc(!sortAsc);

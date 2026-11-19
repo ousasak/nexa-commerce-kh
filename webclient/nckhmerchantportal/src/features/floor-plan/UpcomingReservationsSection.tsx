@@ -89,16 +89,25 @@ export const UpcomingReservationsSection: React.FC<UpcomingReservationsSectionPr
     );
   };
 
+  const statusLabels: Record<string, string> = {
+    upcoming: t('restaurant.statusUpcoming', 'Upcoming'),
+    seated: t('restaurant.statusSeated', 'Seated'),
+    completed: t('restaurant.statusCompleted', 'Completed'),
+    cancelled: t('restaurant.statusCancelled', 'Cancelled'),
+  };
+
   return (
     <div className="space-y-3 pt-2">
       <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-        Upcoming Reservations
+        {t('restaurant.upcomingReservations', 'Upcoming Reservations')}
       </h2>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtered.map((res) => {
           const isUpcoming = res.status === 'upcoming';
-          const tableDisplay = res.tableId ? ` · ${res.tableId}` : '';
+          const tableDisplay = res.tableId
+            ? ` · ${res.tableId.replace(/Table\s*/i, `${t('restaurant.tableLabel', 'Table')} `)}`
+            : '';
 
           return (
             <div
@@ -122,7 +131,7 @@ export const UpcomingReservationsSection: React.FC<UpcomingReservationsSectionPr
                       : 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300'
                   }`}
                 >
-                  {res.status}
+                  {statusLabels[res.status] || res.status}
                 </span>
               </div>
 
@@ -137,7 +146,7 @@ export const UpcomingReservationsSection: React.FC<UpcomingReservationsSectionPr
                 <span className="flex items-center gap-1">
                   <Users className="size-3.5 shrink-0" />
                   <span>
-                    {res.partySize} guests{tableDisplay}
+                    {res.partySize} {t('restaurant.guestsUnit', 'guests')}{tableDisplay}
                   </span>
                 </span>
               </div>
@@ -157,7 +166,7 @@ export const UpcomingReservationsSection: React.FC<UpcomingReservationsSectionPr
                     onClick={() => handleSeatGuest(res)}
                     className="h-7 flex-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium text-xs transition-colors cursor-pointer"
                   >
-                    Seat Guest
+                    {t('restaurant.markSeated', 'Seat Guest')}
                   </button>
                 )}
                 <button
@@ -165,7 +174,7 @@ export const UpcomingReservationsSection: React.FC<UpcomingReservationsSectionPr
                   onClick={() => onEditReservation(res)}
                   className="h-7 flex-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs transition-colors cursor-pointer"
                 >
-                  Edit
+                  {t('common.edit', 'Edit')}
                 </button>
               </div>
             </div>

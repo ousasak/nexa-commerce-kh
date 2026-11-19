@@ -14,6 +14,7 @@ import {
   Receipt,
   Send,
   Smartphone,
+  Palette,
   User,
   Settings,
   Database,
@@ -72,6 +73,7 @@ export const MERCHANT_NAV_GROUPS: NavGroupConfig[] = [
     groupLabel: 'CHANNELS & INTEGRATIONS',
     items: [
       { to: '/reports', labelKey: 'nav.reports', label: 'Analytics', icon: <BarChart3 className="size-4" /> },
+      { to: '/theme', labelKey: 'nav.storefrontTheme', label: 'Storefront Design', icon: <Palette className="size-4" /> },
       { to: '/telegram', labelKey: 'nav.telegram', label: 'Telegram Bot', icon: <Send className="size-4" /> },
       { to: '/payment', labelKey: 'nav.payment', label: 'Payment (ABA Pay)', icon: <Smartphone className="size-4" /> },
     ],

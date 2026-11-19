@@ -62,10 +62,26 @@ export const ReceiptPrintDocument: React.FC<ReceiptPrintDocumentProps> = ({ orde
   };
 
   const isOrderKhr = (order.currency || 'USD').toUpperCase() === 'KHR';
-  const subtotalUsd = isOrderKhr ? (order.items_total || 0) / 4100 : (order.items_total || 0);
+
+  // Defensive totals: fallback to computed items sum if items_total is null/0
+  const computedItemsSum = items.reduce(
+    (sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+  const rawItemsTotal =
+    order.items_total && order.items_total > 0
+      ? order.items_total
+      : computedItemsSum;
+
+  const rawTotal =
+    order.total && order.total > 0
+      ? order.total
+      : rawItemsTotal - (order.discount || 0) + (order.shipping_fee || 0);
+
+  const subtotalUsd = isOrderKhr ? rawItemsTotal / 4100 : rawItemsTotal;
   const discountUsd = isOrderKhr ? (order.discount || 0) / 4100 : (order.discount || 0);
   const shippingUsd = isOrderKhr ? (order.shipping_fee || 0) / 4100 : (order.shipping_fee || 0);
-  const grandTotalUsd = isOrderKhr ? (order.total || 0) / 4100 : (order.total || 0);
+  const grandTotalUsd = isOrderKhr ? rawTotal / 4100 : rawTotal;
 
   const subtotalDual = formatDual(subtotalUsd);
   const discountDual = formatDual(discountUsd);
@@ -198,7 +214,7 @@ export const ReceiptPrintDocument: React.FC<ReceiptPrintDocumentProps> = ({ orde
                 <span className="text-[9px] uppercase font-medium text-slate-500 tracking-wider">
                   {t('receipts.paymentStatus')}:
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[8.5px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300">
                   {order.payment_status?.toLowerCase() === 'paid'
                     ? t('receipts.paid')
                     : order.payment_status?.toLowerCase() === 'pending'
@@ -225,7 +241,7 @@ export const ReceiptPrintDocument: React.FC<ReceiptPrintDocumentProps> = ({ orde
               <User size={11} className="text-slate-500 shrink-0" />
               <span>{t('receipts.customerInfo')}</span>
             </p>
-            <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-slate-200/80 text-slate-700 font-semibold">
+            <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 font-semibold">
               {channelLabel}
             </span>
           </div>
@@ -261,7 +277,7 @@ export const ReceiptPrintDocument: React.FC<ReceiptPrintDocumentProps> = ({ orde
               <CreditCard size={11} className="text-slate-500 shrink-0" />
               <span>{t('receipts.transactionDetails')}</span>
             </p>
-            <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-semibold uppercase">
+            <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold uppercase">
               {order.payment_status?.toLowerCase() === 'paid'
                 ? t('receipts.paid')
                 : order.payment_status?.toLowerCase() === 'pending'
@@ -329,6 +345,13 @@ export const ReceiptPrintDocument: React.FC<ReceiptPrintDocumentProps> = ({ orde
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-slate-400 font-medium text-xs">
+                  {t('receipts.noItems', 'No items in this order')}
+                </td>
+              </tr>
+            )}
             {items.map((item, idx) => {
               const qty = Number(item.quantity) || 1;
               const unitPriceUsd = Number(item.price) || 0;

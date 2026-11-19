@@ -365,7 +365,7 @@ export const StockHealthTable: React.FC<StockHealthTableProps> = ({
                     {/* Action */}
                     <TableCell className="text-center py-3">
                       <Link
-                        to="/products/stock"
+                        to="/stock"
                         className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 px-2 py-1 rounded-lg transition-colors cursor-pointer"
                       >
                         <span>{t('reports.manage', 'Manage')}</span>

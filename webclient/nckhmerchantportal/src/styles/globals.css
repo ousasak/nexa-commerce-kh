@@ -169,3 +169,44 @@ body {
   color: var(--primary-hex, #ec4899) !important;
   border-color: color-mix(in srgb, var(--primary-hex, #ec4899) 32%, transparent) !important;
 }
+
+/* 6. Typography & Sizing Enhancements for Khmer and Controls */
+html[lang="km"] {
+  font-feature-settings: "kern" 1;
+}
+
+/* Ensure comfortable touch/click targets and readable line-height */
+table td, table th {
+  line-height: 1.45;
+}
+
+/* 7. Dedicated Print Media Rules */
+@media print {
+  /* Hide all interactive screen elements when printing */
+  header,
+  nav,
+  aside,
+  .sidebar,
+  [data-sidebar],
+  button,
+  .no-print,
+  #search-bar,
+  .toast-container,
+  .alert-banner {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
+
+

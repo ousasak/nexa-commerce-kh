@@ -346,8 +346,8 @@ export default function UserProfilePage() {
               </div>
 
               {/* Logo Upload Row */}
-              <div className="py-3.5 flex flex-col sm:flex-row sm:items-center gap-3.5 border-b border-slate-100 dark:border-slate-800/80">
-                <div className="size-12 sm:size-13 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
+              <div className="py-4 flex flex-col sm:flex-row sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800/80">
+                <div className="size-14 sm:size-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold text-base shrink-0 overflow-hidden shadow-2xs">
                   {avatarUrl ? (
                     <img src={fullUrl(avatarUrl)} alt="Logo" className="w-full h-full object-cover" />
                   ) : (
@@ -355,9 +355,9 @@ export default function UserProfilePage() {
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-semibold rounded-lg cursor-pointer transition-colors shadow-2xs bg-white dark:bg-slate-900">
-                    <FiUpload className="size-3 text-slate-500" />
+                <div className="space-y-1.5">
+                  <label className="inline-flex items-center gap-2 px-3.5 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg cursor-pointer transition-colors shadow-2xs bg-white dark:bg-slate-900">
+                    <FiUpload className="size-3.5 text-slate-500" />
                     <span>{avatarUploading ? 'Uploading...' : 'Upload Logo'}</span>
                     <input
                       type="file"
@@ -367,33 +367,33 @@ export default function UserProfilePage() {
                       disabled={avatarUploading}
                     />
                   </label>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
                     PNG or SVG, at least 256×256px. Max 2MB.
                   </p>
                 </div>
               </div>
 
-              {/* Form Grid (Compact Sizing: h-8.5 inputs, text-xs) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 pt-3.5">
+              {/* Form Grid (Standard Comfortable Sizing: h-10 inputs, text-sm) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4 pt-4">
                 {/* Row 1: Organization Name * | Industry */}
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Organization Name <span className="text-rose-500">*</span>
                   </label>
                   <Input
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
                     placeholder="FieldForce Operations"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Industry
                   </label>
                   <Select value={industry} onValueChange={setIndustry}>
-                    <SelectTrigger className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3">
+                    <SelectTrigger className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs">
                       <SelectValue placeholder="Select industry" />
                     </SelectTrigger>
                     <SelectContent>
@@ -409,32 +409,32 @@ export default function UserProfilePage() {
 
                 {/* Row 2: Website | Phone */}
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Website
                   </label>
                   <Input
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="https://fieldforce.io"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Phone
                   </label>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1 (512) 555-0148"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 {/* Row 3: Email * | Postal Code */}
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Email <span className="text-rose-500">*</span>
                   </label>
                   <Input
@@ -442,67 +442,67 @@ export default function UserProfilePage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ops@fieldforce.io"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Postal Code
                   </label>
                   <Input
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     placeholder="78701"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 {/* Row 4: Address (col-span-2) */}
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Address
                   </label>
                   <Input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="900 Congress Ave, Suite 200"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 {/* Row 5: City | State */}
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     City
                   </label>
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Austin"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     State
                   </label>
                   <Input
                     value={stateRegion}
                     onChange={(e) => setStateRegion(e.target.value)}
                     placeholder="Texas"
-                    className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3"
+                    className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs"
                   />
                 </div>
 
                 {/* Row 6: Country (col-span-2) */}
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Country
                   </label>
                   <Select value={country} onValueChange={setCountry}>
-                    <SelectTrigger className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3">
+                    <SelectTrigger className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs">
                       <SelectValue placeholder="Select Country" />
                     </SelectTrigger>
                     <SelectContent>
@@ -518,26 +518,26 @@ export default function UserProfilePage() {
 
                 {/* Row 7: Organization Description (col-span-2) */}
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Organization Description
                   </label>
                   <Textarea
-                    rows={3}
+                    rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="FieldForce Operations delivers field service, dispatch, and HR management for multi-site service teams."
-                    className="text-xs border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg resize-none leading-relaxed p-2.5"
+                    className="text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg resize-none leading-relaxed p-3.5 shadow-2xs"
                   />
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-end gap-3 pt-5 mt-5 border-t border-slate-100 dark:border-slate-800/80">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleResetGeneral}
-                  className="h-8 px-4 text-xs font-medium border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="h-10 px-5 text-sm font-medium border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </Button>
@@ -548,16 +548,16 @@ export default function UserProfilePage() {
                   style={{
                     backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
                   }}
-                  className="h-8 px-4 text-xs font-semibold hover:brightness-90 text-white rounded-lg shadow-2xs flex items-center gap-1.5"
+                  className="h-10 px-5 text-sm font-semibold hover:brightness-90 text-white rounded-lg shadow-2xs flex items-center gap-2"
                 >
                   {savingGeneral ? (
                     <>
-                      <span className="size-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       <span>Saving...</span>
                     </>
                   ) : (
                     <>
-                      <FiSave className="size-3" />
+                      <FiSave className="size-3.5" />
                       <span>Save Changes</span>
                     </>
                   )}
@@ -584,10 +584,10 @@ export default function UserProfilePage() {
               </div>
 
               {/* Password Change Form */}
-              <form onSubmit={handlePasswordSubmit} className="space-y-3 pt-1">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                    <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                       Current Password <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -596,20 +596,20 @@ export default function UserProfilePage() {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 pr-8 rounded-lg"
+                        className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 pr-10 shadow-2xs"
                       />
                       <button
                         type="button"
                         onClick={() => setShowCurrentPw(!showCurrentPw)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
                       >
-                        {showCurrentPw ? <FiEyeOff className="size-3.5" /> : <FiEye className="size-3.5" />}
+                        {showCurrentPw ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                    <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                       New Password <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -618,20 +618,20 @@ export default function UserProfilePage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Min 6 characters"
-                        className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 pr-8 rounded-lg"
+                        className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 pr-10 shadow-2xs"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPw(!showNewPw)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
                       >
-                        {showNewPw ? <FiEyeOff className="size-3.5" /> : <FiEye className="size-3.5" />}
+                        {showNewPw ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                    <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                       Confirm New Password <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -640,29 +640,29 @@ export default function UserProfilePage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Repeat password"
-                        className="h-8.5 text-xs border-slate-200/90 dark:border-slate-700 pr-8 rounded-lg"
+                        className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 pr-10 shadow-2xs"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPw(!showConfirmPw)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
                       >
-                        {showConfirmPw ? <FiEyeOff className="size-3.5" /> : <FiEye className="size-3.5" />}
+                        {showConfirmPw ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-1">
+                <div className="flex justify-end pt-2">
                   <Button
                     type="submit"
                     disabled={savingPassword}
                     style={{
                       backgroundColor: 'var(--btn-primary-hex, var(--primary-hex, #ec4899))',
                     }}
-                    className="h-8 px-4 text-xs font-semibold hover:brightness-90 text-white rounded-lg shadow-2xs flex items-center gap-1.5"
+                    className="h-10 px-5 text-sm font-semibold hover:brightness-90 text-white rounded-lg shadow-2xs flex items-center gap-2"
                   >
-                    <FiLock className="size-3" />
+                    <FiLock className="size-3.5" />
                     <span>{savingPassword ? 'Updating...' : 'Update Password'}</span>
                   </Button>
                 </div>
@@ -886,45 +886,45 @@ export default function UserProfilePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Language
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
                       onClick={() => setLanguage('kh')}
-                      className={`h-9 px-3 rounded-lg border flex items-center justify-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      className={`h-10 px-4 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all cursor-pointer ${
                         language === 'kh'
-                          ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
+                          ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 shadow-2xs'
                           : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <span>🇰🇭 ភាសាខ្មែរ</span>
-                      {language === 'kh' && <FiCheck className="size-3" />}
+                      {language === 'kh' && <FiCheck className="size-3.5" />}
                     </button>
                     <button
                       type="button"
                       onClick={() => setLanguage('en')}
-                      className={`h-9 px-3 rounded-lg border flex items-center justify-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      className={`h-10 px-4 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all cursor-pointer ${
                         language === 'en'
-                          ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
+                          ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 shadow-2xs'
                           : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <span>🇺🇸 English</span>
-                      {language === 'en' && <FiCheck className="size-3" />}
+                      {language === 'en' && <FiCheck className="size-3.5" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-1.5 block">
                     Primary Currency
                   </label>
                   <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger className="h-9 text-xs border-slate-200/90 dark:border-slate-700 rounded-lg">
+                    <SelectTrigger className="h-10 text-sm border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-3.5 shadow-2xs">
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
                     <SelectContent>

@@ -61,6 +61,94 @@ class Customer extends Authenticatable
         $this->password = $value;
     }
 
+    // Mutators ensuring non-nullable database columns never receive NULL
+    public function setNameAttribute($value): void
+    {
+        $str = trim((string) ($value ?? ''));
+        $this->attributes['name'] = $str;
+
+        // Auto-populate first_name and last_name if empty
+        if ((empty($this->attributes['first_name']) && empty($this->attributes['last_name'])) && ! empty($str)) {
+            $parts = explode(' ', $str, 2);
+            $this->attributes['first_name'] = $parts[0];
+            $this->attributes['last_name'] = $parts[1] ?? '';
+        }
+    }
+
+    public function setFirstNameAttribute($value): void
+    {
+        $this->attributes['first_name'] = (string) ($value ?? '');
+    }
+
+    public function setLastNameAttribute($value): void
+    {
+        $this->attributes['last_name'] = (string) ($value ?? '');
+    }
+
+    public function setGenderAttribute($value): void
+    {
+        $this->attributes['gender'] = (string) ($value ?? '');
+    }
+
+    public function setUsernameAttribute($value): void
+    {
+        $this->attributes['username'] = (string) ($value ?? '');
+    }
+
+    public function setPhoneAttribute($value): void
+    {
+        $this->attributes['phone'] = trim((string) ($value ?? ''));
+    }
+
+    public function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = trim((string) ($value ?? ''));
+    }
+
+    public function setPasswordAttribute($value): void
+    {
+        $this->attributes['password'] = (string) ($value ?? '');
+    }
+
+    public function setTelegramAttribute($value): void
+    {
+        $tg = trim((string) ($value ?? ''));
+        if (! empty($tg) && ! str_starts_with($tg, '@')) {
+            $tg = '@'.$tg;
+        }
+        $this->attributes['telegram'] = $tg;
+    }
+
+    public function setTelegramUsernameAttribute($value): void
+    {
+        $this->attributes['telegram_username'] = (string) ($value ?? '');
+    }
+
+    public function setTelegramPhoneAttribute($value): void
+    {
+        $this->attributes['telegram_phone'] = (string) ($value ?? '');
+    }
+
+    public function setAddressAttribute($value): void
+    {
+        $this->attributes['address'] = (string) ($value ?? '');
+    }
+
+    public function setCityAttribute($value): void
+    {
+        $this->attributes['city'] = (string) ($value ?? '');
+    }
+
+    public function setCountryAttribute($value): void
+    {
+        $this->attributes['country'] = (string) ($value ?? '');
+    }
+
+    public function setNotesAttribute($value): void
+    {
+        $this->attributes['notes'] = $value !== null ? (string) $value : null;
+    }
+
     public function to_dict(): array
     {
         return [

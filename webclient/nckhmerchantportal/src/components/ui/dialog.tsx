@@ -49,12 +49,12 @@ const DialogContent = React.forwardRef<
       {!hideCloseButton && (
         <DialogPrimitive.Close asChild>
           <CloseButton
-            size="md"
+            size="sm"
             shape="circle"
             color="default"
             {...closeButtonProps}
             className={cn(
-              "!absolute !right-4 !top-4 sm:!top-[18px] z-50 !w-[34px] !h-[34px]",
+              "!absolute !right-3.5 !top-3.5 sm:!top-4 z-50 !w-7 !h-7 min-w-[28px] min-h-[28px]",
               closeButtonProps?.className
             )}
           />

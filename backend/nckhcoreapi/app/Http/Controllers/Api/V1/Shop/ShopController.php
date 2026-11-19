@@ -175,7 +175,16 @@ class ShopController extends Controller
 
         foreach ($fields as $f) {
             if ($request->has($f)) {
-                $shop->{$f} = $request->input($f);
+                $val = $request->input($f);
+                if (in_array($f, ['logo', 'banner', 'shop_name'])) {
+                    $shop->{$f} = $val ?? '';
+                } elseif ($f === 'currency') {
+                    $shop->{$f} = $val ?: 'USD';
+                } elseif ($f === 'status') {
+                    $shop->{$f} = $val ?: 'active';
+                } else {
+                    $shop->{$f} = $val;
+                }
             }
         }
 
